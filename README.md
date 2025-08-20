@@ -6,6 +6,7 @@ A Spring Boot application that matches candidate CVs (PDF or TXT) to a job vacan
 - Upload CVs as `.pdf` or `.txt` files to `src/main/resources/cvs/`
 - REST API to find the best-matching candidates for a job description
 - Uses OpenAI (or compatible) LLM to generate fit summaries and ratings
+- Externalized prompt templates with System/User roles for robust, tunable inference
 
 ## Prerequisites
 - Java 17+
@@ -18,7 +19,7 @@ A Spring Boot application that matches candidate CVs (PDF or TXT) to a job vacan
 
 ```bash
 git clone <your-repo-url>
-cd candidate-matcher
+cd cv-analyzer
 ```
 
 2. **Add your OpenAI API key**
@@ -26,13 +27,13 @@ cd candidate-matcher
 Create a `.env` file in the project root:
 
 ```
-OPEN_AI_API_KEY=sk-...your-key...
+OPENAI_API_KEY=sk-...your-key...
 ```
 
 Alternatively, set the environment variable in your shell:
 
 ```bash
-export OPEN_AI_API_KEY=sk-...your-key...
+export OPENAI_API_KEY=sk-...your-key...
 ```
 
 3. **Add candidate CVs**
@@ -46,8 +47,8 @@ Each file should represent one candidate's resume.
 4. **Build and run the application**
 
 ```bash
-mvn clean package
-mvn spring-boot:run
+./mvnw clean package
+./mvnw spring-boot:run
 ```
 
 The app will start on [http://localhost:8080](http://localhost:8080).
@@ -85,6 +86,29 @@ curl -X POST http://localhost:8080/api/candidate-matcher/match \
   -H "Content-Type: application/json" \
   -d '{"vacancyDescription": "Looking for a Java developer with Spring Boot and PDF processing experience."}'
 ```
+
+## Prompt customization (System/User roles)
+
+- Prompts are externalized to files under `src/main/resources/prompts`:
+  - Summary system: `prompts/summary/system.txt`
+  - Summary user: `prompts/summary/user.txt`
+  - Rating system: `prompts/rating/system.txt`
+  - Rating user: `prompts/rating/user.txt`
+- Placeholders available in user templates:
+  - `{{vacancy_description}}`
+  - `{{cv_content}}`
+- You can override prompt file locations without changing code:
+  - In `application.properties`:
+    - `prompts.summary.system=classpath:prompts/summary/system.txt`
+    - `prompts.summary.user=classpath:prompts/summary/user.txt`
+    - `prompts.rating.system=classpath:prompts/rating/system.txt`
+    - `prompts.rating.user=classpath:prompts/rating/user.txt`
+  - Or via environment variables (Spring property syntax):
+    - `PROMPTS_SUMMARY_SYSTEM=file:/abs/path/summary-system.txt`
+    - `PROMPTS_SUMMARY_USER=file:/abs/path/summary-user.txt`
+    - `PROMPTS_RATING_SYSTEM=file:/abs/path/rating-system.txt`
+    - `PROMPTS_RATING_USER=file:/abs/path/rating-user.txt`
+- The app sends role-based messages to the LLM: a System instruction plus a User message rendered from the templates with your placeholders.
 
 ## Notes
 - The OpenAI API key is required for LLM-powered summaries and ratings.

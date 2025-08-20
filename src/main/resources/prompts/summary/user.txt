@@ -1,0 +1,7 @@
+Job Description:
+{{vacancy_description}}
+
+Candidate CV:
+{{cv_content}}
+
+Task: Provide a concise 2–3 sentence summary stating the candidate's fit for the role, explicitly referencing relevant skills and experience from the CV. 

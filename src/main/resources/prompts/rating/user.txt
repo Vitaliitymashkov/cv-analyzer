@@ -1,0 +1,7 @@
+Job Description:
+{{vacancy_description}}
+
+Candidate CV:
+{{cv_content}}
+
+Task: On a scale from 1 to 12 (12 is the best fit), rate how well the candidate matches the job description. Return only the number. 

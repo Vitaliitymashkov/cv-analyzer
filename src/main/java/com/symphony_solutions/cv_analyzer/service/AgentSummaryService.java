@@ -7,29 +7,41 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class AgentSummaryService {
+
     private final ChatClient.Builder chatClient;
 
-    private static final String SYSTEM_PROMPT = "You are an expert recruiter. Given a job description and a candidate's CV, explain in 2-3 sentences why this candidate is a good fit for the job. Be specific about relevant skills and experience.";
-    private static final String RATING_PROMPT = "On a scale from 1 to 12 (where 12 is the best fit), rate how well this candidate matches the job description. Only return the number.";
+    private final PromptService promptService;
 
     public String generateSummary(String vacancyDescription, String cvContent) {
-        String userPrompt = String.format(
-            "Job Description:\n%s\n\nCandidate CV:\n%s\n\n%s",
-            vacancyDescription,
-            cvContent,
-            "Explain concisely why this candidate is a good fit."
-        );
-        return chatClient.build().prompt(SYSTEM_PROMPT + "\n" + userPrompt).call().content();
+        String system = promptService.getSummarySystemPrompt();
+        String userTemplate = promptService.getSummaryUserPrompt();
+        String userMessage = userTemplate
+                .replace("{{vacancy_description}}", vacancyDescription)
+                .replace("{{cv_content}}", cvContent);
+
+        return chatClient
+                .build()
+                .prompt()
+                .system(system)
+                .user(userMessage)
+                .call()
+                .content();
     }
 
     public int generateRating(String vacancyDescription, String cvContent) {
-        String userPrompt = String.format(
-            "Job Description:\n%s\n\nCandidate CV:\n%s\n\n%s",
-            vacancyDescription,
-            cvContent,
-            RATING_PROMPT
-        );
-        String response = chatClient.build().prompt(userPrompt).call().content();
+        String system = promptService.getRatingSystemPrompt();
+        String userTemplate = promptService.getRatingUserPrompt();
+        String userMessage = userTemplate
+                .replace("{{vacancy_description}}", vacancyDescription)
+                .replace("{{cv_content}}", cvContent);
+
+        String response = chatClient
+                .build()
+                .prompt()
+                .system(system)
+                .user(userMessage)
+                .call()
+                .content();
         try {
             return Integer.parseInt(response.replaceAll("[^0-9]", "").trim());
         } catch (Exception e) {
