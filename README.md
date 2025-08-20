@@ -110,6 +110,32 @@ curl -X POST http://localhost:8080/api/candidate-matcher/match \
     - `PROMPTS_RATING_USER=file:/abs/path/rating-user.txt`
 - The app sends role-based messages to the LLM: a System instruction plus a User message rendered from the templates with your placeholders.
 
+### Runtime prompt refresh (no restart)
+
+- Prompts are cached at startup for performance. After editing prompt files, refresh them at runtime via the admin endpoint:
+
+```bash
+curl -u admin:admin -X POST http://localhost:8080/api/admin/prompts/refresh
+```
+
+- Response: `200 OK` with body `Prompts reloaded`.
+- This reloads all configured prompt files (system/user, summary/rating) without restarting the app.
+
+### Securing the admin endpoint
+
+- The `/api/admin/**` endpoints are protected with HTTP Basic auth.
+- Default credentials (override in production):
+  - Username: `admin` (property `admin.username` or env `ADMIN_USERNAME`)
+  - Password: `admin` (property `admin.password` or env `ADMIN_PASSWORD`)
+- Example with custom credentials:
+
+```bash
+export ADMIN_USERNAME=myadmin
+export ADMIN_PASSWORD=strongsecret
+# then restart the app and use
+curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admin/prompts/refresh
+```
+
 ## Notes
 - The OpenAI API key is required for LLM-powered summaries and ratings.
 - The app supports both `.pdf` and `.txt` CVs.

@@ -10,6 +10,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.stream.Collectors;
+import jakarta.annotation.PostConstruct;
 
 @Service
 @RequiredArgsConstructor
@@ -29,20 +30,41 @@ public class PromptService {
     @Value("${prompts.rating.user:classpath:prompts/rating/user.txt}")
     private String ratingUserPath;
 
+    private volatile String cachedSummarySystem;
+    private volatile String cachedSummaryUser;
+    private volatile String cachedRatingSystem;
+    private volatile String cachedRatingUser;
+
+    @PostConstruct
+    public void init() {
+        reloadAll();
+    }
+
+    public synchronized void refresh() {
+        reloadAll();
+    }
+
     public String getSummarySystemPrompt() {
-        return readResource(summarySystemPath);
+        return cachedSummarySystem;
     }
 
     public String getSummaryUserPrompt() {
-        return readResource(summaryUserPath);
+        return cachedSummaryUser;
     }
 
     public String getRatingSystemPrompt() {
-        return readResource(ratingSystemPath);
+        return cachedRatingSystem;
     }
 
     public String getRatingUserPrompt() {
-        return readResource(ratingUserPath);
+        return cachedRatingUser;
+    }
+
+    private void reloadAll() {
+        cachedSummarySystem = readResource(summarySystemPath);
+        cachedSummaryUser = readResource(summaryUserPath);
+        cachedRatingSystem = readResource(ratingSystemPath);
+        cachedRatingUser = readResource(ratingUserPath);
     }
 
     private String readResource(String location) {

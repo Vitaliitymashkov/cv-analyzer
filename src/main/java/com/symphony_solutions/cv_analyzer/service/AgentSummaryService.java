@@ -3,6 +3,7 @@ package com.symphony_solutions.cv_analyzer.service;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +43,21 @@ public class AgentSummaryService {
                 .user(userMessage)
                 .call()
                 .content();
+
+        return Optional.ofNullable(response)
+                .map(r -> r.replaceAll("[^0-9]", "").trim())
+                .flatMap(this::parseIntSafe)
+                .orElse(1);
+    }
+
+    private Optional<Integer> parseIntSafe(String value) {
+        if (value == null || value.isBlank()) {
+            return Optional.empty();
+        }
         try {
-            return Integer.parseInt(response.replaceAll("[^0-9]", "").trim());
-        } catch (Exception e) {
-            return 1; // fallback to lowest rating
+            return Optional.of(Integer.parseInt(value));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
         }
     }
 }
