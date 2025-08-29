@@ -17,7 +17,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class CvService {
+
     private static final String TXT_PATTERN = "classpath:cvs/*.txt";
+
     private static final String PDF_PATTERN = "classpath:cvs/*.pdf";
 
     /**
@@ -38,21 +40,21 @@ public class CvService {
         return loadAllCvs().stream()
                 .sorted(Comparator.comparingInt((Cv cv) -> matchScore(cv, keywords)).reversed())
                 .limit(limit)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Cv> loadTextCvs() {
         return loadResources(TXT_PATTERN).stream()
                 .map(this::parseTextCv)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Cv> loadPdfCvs() {
         return loadResources(PDF_PATTERN).stream()
                 .map(this::parsePdfCv)
                 .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     private List<Resource> loadResources(String pattern) {

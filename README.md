@@ -3,12 +3,15 @@
 A Spring Boot application that matches candidate CVs (PDF or TXT) to a job vacancy description using LLM-powered summaries and ratings.
 
 ## Features
+
 - Upload CVs as `.pdf` or `.txt` files to `src/main/resources/cvs/`
 - REST API to find the best-matching candidates for a job description
 - Uses OpenAI (or compatible) LLM to generate fit summaries and ratings
 - Externalized prompt templates with System/User roles for robust, tunable inference
+- **GenAI metrics exposed via Spring Boot Actuator endpoints for LLM usage monitoring**
 
 ## Prerequisites
+
 - Java 17+
 - Maven 3.8+
 - An OpenAI API key (or compatible endpoint)
@@ -39,9 +42,11 @@ export OPENAI_API_KEY=sk-...your-key...
 3. **Add candidate CVs**
 
 Place `.pdf` and/or `.txt` files in:
+
 ```
 src/main/resources/cvs/
 ```
+
 Each file should represent one candidate's resume.
 
 4. **Build and run the application**
@@ -60,6 +65,7 @@ The app will start on [http://localhost:8080](http://localhost:8080).
 **POST** `/api/candidate-matcher/match`
 
 **Request Body:**
+
 ```json
 {
   "vacancyDescription": "Looking for a Java developer with Spring Boot and PDF processing experience."
@@ -67,6 +73,7 @@ The app will start on [http://localhost:8080](http://localhost:8080).
 ```
 
 **Response:**
+
 ```json
 [
   {
@@ -86,6 +93,17 @@ curl -X POST http://localhost:8080/api/candidate-matcher/match \
   -H "Content-Type: application/json" \
   -d '{"vacancyDescription": "Looking for a Java developer with Spring Boot and PDF processing experience."}'
 ```
+
+### GenAI Metrics via Actuator
+
+Spring Boot Actuator exposes health, info, and metrics endpoints.  
+GenAI metrics are available at:
+
+- `/actuator/metrics/gen_ai.client.operation`
+- `/actuator/metrics/gen_ai.client.operation.active`
+- `/actuator/metrics/gen_ai.client.token.usage`
+
+These endpoints provide insights into LLM usage and performance.
 
 ## Prompt customization (System/User roles)
 
@@ -137,9 +155,11 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
 ```
 
 ## Notes
+
 - The OpenAI API key is required for LLM-powered summaries and ratings.
 - The app supports both `.pdf` and `.txt` CVs.
 - Summaries and ratings are generated per candidate using the LLM.
 
 ## License
-MIT 
+
+MIT
