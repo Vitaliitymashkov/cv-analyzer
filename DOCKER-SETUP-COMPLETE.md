@@ -113,3 +113,4 @@ The CV Analyzer application is now fully containerized and ready for:
 - Easy scaling and management
 
 All services are running and accessible at their respective ports.
+

@@ -200,3 +200,4 @@ docker system prune -a
 3. **Gzip Compression**: Enabled in Nginx configuration
 4. **Resource Limits**: Configure memory and CPU limits as needed
 
+
