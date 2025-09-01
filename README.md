@@ -1,19 +1,40 @@
-# Candidate Matcher
+# CV Analyzer
 
-A Spring Boot application that matches candidate CVs (PDF or TXT) to a job vacancy description using LLM-powered summaries and ratings.
+A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy descriptions using LLM-powered summaries and ratings.
+
+## Application Overview
+
+- **Backend**: Spring Boot REST API with OpenAI integration
+- **Frontend**: React web application with modern UI
+- **Features**: CV analysis, candidate matching, and rating system
 
 ## Features
 
-- Upload CVs as `.pdf` or `.txt` files to `src/main/resources/cvs/`
+### Backend Features
+- Upload CVs as `.pdf` or `.txt` files to `backend/src/main/resources/cvs/`
 - REST API to find the best-matching candidates for a job description
 - Uses OpenAI (or compatible) LLM to generate fit summaries and ratings
 - Externalized prompt templates with System/User roles for robust, tunable inference
 - **GenAI metrics exposed via Spring Boot Actuator endpoints for LLM usage monitoring**
 
+### Frontend Features
+- Modern React web interface
+- Upload and manage CV files
+- Submit job descriptions for candidate matching
+- View candidate summaries and ratings
+- Responsive design for desktop and mobile
+
 ## Prerequisites
 
+### Option 1: Local Development
 - Java 17+
 - Maven 3.8+
+- Node.js 18+ (for frontend)
+- An OpenAI API key (or compatible endpoint)
+
+### Option 2: Docker (Recommended)
+- Docker
+- Docker Compose
 - An OpenAI API key (or compatible endpoint)
 
 ## Setup
@@ -33,30 +54,88 @@ Create a `.env` file in the project root:
 OPENAI_API_KEY=sk-...your-key...
 ```
 
-Alternatively, set the environment variable in your shell:
-
-```bash
-export OPENAI_API_KEY=sk-...your-key...
-```
-
 3. **Add candidate CVs**
 
 Place `.pdf` and/or `.txt` files in:
 
 ```
-src/main/resources/cvs/
+backend/src/main/resources/cvs/
 ```
 
 Each file should represent one candidate's resume.
 
-4. **Build and run the application**
+## Running the Application
+
+### Option 1: Using Docker (Recommended)
+
+The easiest way to run the application is using Docker Compose:
 
 ```bash
+# Start all services
+docker-compose up -d
+
+# Or use the management script
+./docker-scripts.sh start
+```
+
+The application will be available at:
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8080
+
+**Other useful Docker commands:**
+```bash
+# Check service status
+./docker-scripts.sh status
+
+# View logs
+./docker-scripts.sh logs
+
+# Stop services
+./docker-scripts.sh stop
+
+# Development mode with hot reloading
+./docker-scripts.sh dev
+```
+
+### Option 2: Local Development
+
+If you prefer to run the services locally:
+
+**Backend:**
+```bash
+cd backend
 ./mvnw clean package
 ./mvnw spring-boot:run
 ```
 
-The app will start on [http://localhost:8080](http://localhost:8080).
+**Frontend:**
+```bash
+cd frontend
+npm install
+npm start
+```
+
+The backend will start on [http://localhost:8080](http://localhost:8080) and the frontend on [http://localhost:3000](http://localhost:3000).
+
+## Project Structure
+
+```
+cv-analyzer/
+├── backend/                 # Spring Boot application
+│   ├── src/main/java/      # Java source code
+│   ├── src/main/resources/ # Configuration and resources
+│   │   ├── cvs/           # CV files directory
+│   │   └── prompts/       # AI prompt templates
+│   └── Dockerfile         # Backend Docker configuration
+├── frontend/               # React application
+│   ├── src/               # React source code
+│   ├── public/            # Static assets
+│   └── Dockerfile         # Frontend Docker configuration
+├── docker-compose.yml     # Production Docker setup
+├── docker-compose.dev.yml # Development Docker setup
+├── docker-scripts.sh      # Docker management script
+└── .env                   # Environment variables
+```
 
 ## API Usage
 

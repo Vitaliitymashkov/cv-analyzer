@@ -1,0 +1,35 @@
+.main-nav {
+    background-color: #34495e;
+    padding: 10px 0;
+    margin-bottom: 30px;
+    border-radius: 6px;
+}
+
+.main-nav ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+}
+
+.main-nav li {
+    margin: 0 15px;
+}
+
+.main-nav a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 10px 15px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.main-nav a:hover {
+    background-color: #4e6a85;
+}
+
+.main-nav a.active {
+    background-color: #3498db;
+}

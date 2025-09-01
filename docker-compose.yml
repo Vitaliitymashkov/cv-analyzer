@@ -1,0 +1,39 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cv-analyzer-backend
+    ports:
+      - "8080:8080"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+    volumes:
+      - ./backend/src/main/resources/cvs:/app/cvs:ro
+      - ./backend/src/main/resources/prompts:/app/prompts:ro
+    networks:
+      - cv-analyzer-network
+
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cv-analyzer-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - cv-analyzer-network
+
+
+networks:
+  cv-analyzer-network:
+    driver: bridge
+
+volumes:
+  cvs-data:
+  prompts-data:
