@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Box, Button, Heading, Text, Textarea, SimpleGrid, Spinner, Alert } from '@chakra-ui/react';
 
 function MatcherPage() {
     const [vacancyDescription, setVacancyDescription] = useState('');
@@ -16,7 +17,7 @@ function MatcherPage() {
         setError('');
         setMatches([]);
         try {
-            const response = await axios.post('/api/candidate-matcher/match', vacancyDescription, {
+            const response = await axios.post('/api/candidate-matcher/match', { vacancyDescription }, {
                 headers: { 'Content-Type': 'application/json' }
             });
             setMatches(response.data || []);
@@ -29,31 +30,45 @@ function MatcherPage() {
     };
 
     return (
-        <div className="section">
-            <h2>Candidate Search</h2>
-            <textarea
+        <Box as="section" mb={8}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={4} mb={4}>
+                <Heading as="h2" size="lg">Candidate Search</Heading>
+                <Button onClick={handleMatchCandidates} isDisabled={isLoading} colorScheme="purple">
+                    {isLoading ? 'Searching...' : 'Find Candidates'}
+                </Button>
+            </Box>
+            <Textarea
                 value={vacancyDescription}
                 onChange={(e) => setVacancyDescription(e.target.value)}
                 placeholder="Paste the vacancy description here..."
+                minH="160px"
+                mb={3}
             />
-            <button onClick={handleMatchCandidates} disabled={isLoading}>
-                {isLoading ? 'Searching...' : 'Find Candidates'}
-            </button>
-            {isLoading && <div className="loading">Searching for the best candidates...</div>}
-            {error && <div className="notification error">{error}</div>}
-            <div className="results-container">
-                {matches.length > 0 && <h3>Found Candidates:</h3>}
-                {matches.map((match, index) => (
-                    <div key={index} className="candidate-card">
-                        <h3>{match.name}</h3>
-                        <p><strong>File: </strong>{match.filename}</p>
-                        <p><strong>Rating: </strong>{match.rating}</p>
-                        <h4>Analysis Result:</h4>
-                        <pre>{match.summary}</pre>
-                    </div>
+            {isLoading && (
+                <Box display="flex" alignItems="center" gap={3} mb={3} color="gray.400">
+                    <Spinner size="sm" />
+                    <Text>Searching for the best candidates...</Text>
+                </Box>
+            )}
+            {error && (
+                <Alert status="error" mb={3}>
+                    {error}
+                </Alert>
+            )}
+            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
+                {matches.length > 0 && matches.map((match) => (
+                    <Box key={match.filename || match.name} bg="rgba(255,255,255,0.04)" borderWidth="1px" borderColor="rgba(255,255,255,0.12)" borderRadius="md" p={4}>
+                        <Heading as="h3" size="md" mb={2}>{match.name}</Heading>
+                        <Text fontSize="sm" color="gray.500" mb={1}><strong>File:</strong> {match.filename}</Text>
+                        <Text fontSize="sm" color="gray.500" mb={3}><strong>Rating:</strong> {match.rating}</Text>
+                        <Heading as="h4" size="sm" mb={2}>Analysis Result</Heading>
+                        <Box as="pre" whiteSpace="pre-wrap" wordBreak="break-word" bg="rgba(0,0,0,0.25)" p={3} borderRadius="sm" fontSize="sm" color="inherit">
+                            {match.summary}
+                        </Box>
+                    </Box>
                 ))}
-            </div>
-        </div>
+            </SimpleGrid>
+        </Box>
     );
 }
 

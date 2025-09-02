@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import { Box, Button, Heading, Alert } from '@chakra-ui/react';
 
 function AdminPage() {
     const [notification, setNotification] = useState({ message: '', type: '' });
@@ -20,17 +21,19 @@ function AdminPage() {
     };
 
     return (
-        <div className="section">
-            <h2>Admin Panel</h2>
-            <button onClick={handleRefreshPrompts} disabled={isLoading}>
-                {isLoading ? 'Updating...' : 'Update Prompts'}
-            </button>
+        <Box as="section" mb={8}>
+            <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={4} mb={4}>
+                <Heading as="h2" size="lg">Admin Panel</Heading>
+                <Button onClick={handleRefreshPrompts} isDisabled={isLoading} colorScheme="purple">
+                    {isLoading ? 'Updating...' : 'Update Prompts'}
+                </Button>
+            </Box>
             {notification.message && (
-                <div className={`notification ${notification.type}`}>
+                <Alert status={notification.type === 'success' ? 'success' : 'error'}>
                     {notification.message}
-                </div>
+                </Alert>
             )}
-        </div>
+        </Box>
     );
 }
 

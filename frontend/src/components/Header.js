@@ -1,13 +1,13 @@
 import React from 'react';
-import logo from '../assets/logo.png'; // Adjust path if needed
-import './Header.css';
+import { Box, Image, Heading } from '@chakra-ui/react';
+import logo from '../assets/logo.png';
 
 function Header() {
     return (
-        <header className="app-header">
-            <img src={logo} alt="Logo" className="logo" />
-            <h1>CV Analyzer</h1>
-        </header>
+        <Box display="flex" alignItems="center" gap={3} p={4}>
+            <Image src={logo} alt="Logo" boxSize="40px" borderRadius="md" />
+            <Heading as="h1" size="lg">CV Analyzer</Heading>
+        </Box>
     );
 }
 

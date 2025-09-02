@@ -1,113 +1,15 @@
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    background-color: #f4f7f9;
-    color: #333;
-    margin: 0;
-    padding: 20px;
-}
-
+/* Minimal styles for layout - Chakra handles the rest */
 .App {
-    max-width: 900px;
-    margin: 0 auto;
-    background-color: #fff;
-    padding: 20px 40px;
-    border-radius: 8px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    min-height: 100vh;
+    transition: margin-left 0.25s ease;
 }
 
-h1, h2 {
-    color: #2c3e50;
-    border-bottom: 2px solid #e0e0e0;
-    padding-bottom: 10px;
-}
-
-.section {
-    margin-bottom: 40px;
-}
-
-textarea {
-    width: 100%;
-    padding: 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 16px;
-    min-height: 150px;
-    box-sizing: border-box;
-    margin-bottom: 15px;
-}
-
-button {
-    background-color: #3498db;
-    color: white;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 5px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button:hover {
-    background-color: #2980b9;
-}
-
-button:disabled {
-    background-color: #bdc3c7;
-    cursor: not-allowed;
-}
-
-.notification {
-    padding: 10px;
-    margin-top: 15px;
-    border-radius: 4px;
-    font-weight: bold;
-}
-
-.notification.success {
-    background-color: #e8f5e9;
-    color: #2e7d32;
-}
-
-.notification.error {
-    background-color: #ffebee;
-    color: #c62828;
-}
-
-.loading {
-    margin-top: 15px;
-    font-style: italic;
-    color: #7f8c8d;
-}
-
-.results-container {
-    margin-top: 20px;
-}
-
-.candidate-card {
-    background-color: #f9f9f9;
-    border: 1px solid #e0e0e0;
-    border-radius: 6px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
-}
-
-.candidate-card h3 {
-    margin-top: 0;
-    color: #34495e;
-}
-
-.candidate-card a {
-    color: #3498db;
-    text-decoration: none;
-}
-
-.candidate-card pre {
-    background-color: #ecf0f1;
-    padding: 15px;
-    border-radius: 4px;
-    white-space: pre-wrap; /* Щоб текст переносився */
-    word-wrap: break-word;
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 14px;
+@media (min-width: 1024px) {
+    .App {
+        margin-left: 260px; /* leave space for sidebar when open */
+    }
+    
+    .App.sidebar-hidden {
+        margin-left: 0; /* full width when sidebar is hidden */
+    }
 }
