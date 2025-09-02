@@ -19,6 +19,7 @@ A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy 
 - **Real-time cost tracking with actual token usage via Aspect-Oriented Programming (AOP)**
 - **Configurable OpenAI pricing with automatic cost calculation**
 - **Health monitoring and system metrics via Spring Boot Actuator**
+- **Admin-only prompt management with secure REST API endpoints**
 
 ### Frontend Features
 - **Modern React web interface with Chakra UI components**
@@ -30,6 +31,9 @@ A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy 
 - **Real-time Health & Metrics dashboard with auto-refresh**
 - **GenAI cost tracking and token usage visualization**
 - **System health monitoring with detailed component status**
+- **Drag & Drop Health Cards**: Customizable metric card layout with persistent user preferences
+- **Admin Panel with tabbed interface for system and prompt management**
+- **Secure prompt management with view, edit, reset, and refresh capabilities**
 - Responsive design for desktop, tablet, and mobile
 
 ## Prerequisites
@@ -232,6 +236,78 @@ curl -X POST http://localhost:8080/api/candidate-matcher/match \
 }
 ```
 
+### Prompt Management API (Admin Only)
+
+**All prompt management endpoints require admin authentication.**
+
+#### Get All Prompts
+
+**GET** `/api/admin/prompts`
+
+**Authentication:** Basic Auth (admin:admin)
+
+**Response:**
+```json
+[
+  {
+    "type": "summary",
+    "role": "system",
+    "content": "You are an expert technical recruiter...",
+    "filePath": "classpath:prompts/summary/system.txt",
+    "cached": true
+  },
+  ...
+]
+```
+
+#### Get Specific Prompt
+
+**GET** `/api/admin/prompts/{type}/{role}`
+
+**Authentication:** Basic Auth (admin:admin)
+
+**Example:**
+```bash
+curl -u admin:admin http://localhost:8080/api/admin/prompts/summary/system
+```
+
+#### Update Prompt
+
+**PUT** `/api/admin/prompts`
+
+**Authentication:** Basic Auth (admin:admin)
+
+**Request Body:**
+```json
+{
+  "type": "summary",
+  "role": "system",
+  "content": "Updated prompt content..."
+}
+```
+
+#### Reset Prompt to Default
+
+**POST** `/api/admin/prompts/{type}/{role}/reset`
+
+**Authentication:** Basic Auth (admin:admin)
+
+**Example:**
+```bash
+curl -u admin:admin -X POST http://localhost:8080/api/admin/prompts/summary/system/reset
+```
+
+#### Refresh All Prompts
+
+**POST** `/api/admin/prompts/refresh`
+
+**Authentication:** Basic Auth (admin:admin)
+
+**Example:**
+```bash
+curl -u admin:admin -X POST http://localhost:8080/api/admin/prompts/refresh
+```
+
 ### GenAI Metrics via Actuator
 
 Spring Boot Actuator exposes health, info, and metrics endpoints.  
@@ -257,6 +333,9 @@ The application includes a comprehensive **Health & Metrics Dashboard** accessib
 - **Pricing Information**: Current OpenAI pricing configuration
 - **Auto-refresh**: Updates every 30 seconds automatically
 - **Responsive Design**: Works on desktop, tablet, and mobile
+- **Drag & Drop Cards**: Customizable metric card layout with persistent user preferences
+- **Visual Drag Handles**: Intuitive drag indicators for easy reordering
+- **Touch Support**: Full mobile and tablet drag and drop support
 
 ### Cost Tracking Features
 
@@ -269,7 +348,22 @@ The application now includes **comprehensive cost tracking**:
 - **Configurable Pricing**: Set custom pricing via environment variables
 - **Historical Tracking**: Maintains cumulative cost and token usage
 
-## Prompt customization (System/User roles)
+## Prompt Management
+
+### Admin Interface
+
+The application provides a comprehensive **Admin Panel** for managing AI prompts through a secure web interface:
+
+- **Access**: Navigate to `/admin` and switch to the "Prompt Management" tab
+- **Authentication**: Requires admin credentials (default: admin:admin)
+- **Features**:
+  - **View Prompts**: See all current prompts with content preview
+  - **Edit Prompts**: Modify prompt content with a rich text editor
+  - **Reset Prompts**: Restore prompts to their default values
+  - **Refresh Cache**: Reload prompts from files without restart
+  - **Copy to Clipboard**: Easy content copying for external editing
+
+### Prompt Structure
 
 - Prompts are externalized to files under `src/main/resources/prompts`:
   - Summary system: `prompts/summary/system.txt`
@@ -279,37 +373,38 @@ The application now includes **comprehensive cost tracking**:
 - Placeholders available in user templates:
   - `{{vacancy_description}}`
   - `{{cv_content}}`
-- You can override prompt file locations without changing code:
-  - In `application.properties`:
-    - `prompts.summary.system=classpath:prompts/summary/system.txt`
-    - `prompts.summary.user=classpath:prompts/summary/user.txt`
-    - `prompts.rating.system=classpath:prompts/rating/system.txt`
-    - `prompts.rating.user=classpath:prompts/rating/user.txt`
-  - Or via environment variables (Spring property syntax):
-    - `PROMPTS_SUMMARY_SYSTEM=file:/abs/path/summary-system.txt`
-    - `PROMPTS_SUMMARY_USER=file:/abs/path/summary-user.txt`
-    - `PROMPTS_RATING_SYSTEM=file:/abs/path/rating-system.txt`
-    - `PROMPTS_RATING_USER=file:/abs/path/rating-user.txt`
 - The app sends role-based messages to the LLM: a System instruction plus a User message rendered from the templates with your placeholders.
 
-### Runtime prompt refresh (no restart)
+### Configuration Options
 
-- Prompts are cached at startup for performance. After editing prompt files, refresh them at runtime via the admin endpoint:
+You can override prompt file locations without changing code:
+- In `application.properties`:
+  - `prompts.summary.system=classpath:prompts/summary/system.txt`
+  - `prompts.summary.user=classpath:prompts/summary/user.txt`
+  - `prompts.rating.system=classpath:prompts/rating/system.txt`
+  - `prompts.rating.user=classpath:prompts/rating/user.txt`
+- Or via environment variables (Spring property syntax):
+  - `PROMPTS_SUMMARY_SYSTEM=file:/abs/path/summary-system.txt`
+  - `PROMPTS_SUMMARY_USER=file:/abs/path/summary-user.txt`
+  - `PROMPTS_RATING_SYSTEM=file:/abs/path/rating-system.txt`
+  - `PROMPTS_RATING_USER=file:/abs/path/rating-user.txt`
 
-```bash
-curl -u admin:admin -X POST http://localhost:8080/api/admin/prompts/refresh
-```
+### Runtime Management
 
-- Response: `200 OK` with body `Prompts reloaded`.
-- This reloads all configured prompt files (system/user, summary/rating) without restarting the app.
+- **File Persistence**: Changes made through the admin interface are saved to actual files
+- **Cache Synchronization**: Memory cache stays in sync with file changes
+- **No Restart Required**: All prompt changes take effect immediately
+- **Backup & Recovery**: Reset functionality restores original prompt values
 
-### Securing the admin endpoint
+### Security
 
-- The `/api/admin/**` endpoints are protected with HTTP Basic auth.
-- Default credentials (override in production):
+- **Admin-Only Access**: All prompt management requires admin authentication
+- **HTTP Basic Auth**: Default credentials (override in production):
   - Username: `admin` (property `admin.username` or env `ADMIN_USERNAME`)
   - Password: `admin` (property `admin.password` or env `ADMIN_PASSWORD`)
-- Example with custom credentials:
+- **API Protection**: All `/api/admin/prompts/**` endpoints are secured with `@PreAuthorize("hasRole('ADMIN')")`
+
+### Example: Custom Admin Credentials
 
 ```bash
 export ADMIN_USERNAME=myadmin
@@ -328,8 +423,14 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
 
 ### Pages & Functionality
 - **Candidate Search** (`/`): Main page for job description input and candidate matching
-- **Admin Panel** (`/admin`): Prompt refresh and administrative functions
-- **Health & Metrics** (`/health`): Real-time system monitoring and cost tracking
+- **Admin Panel** (`/admin`): Comprehensive admin interface with tabbed sections:
+  - **System Management**: General admin operations and prompt refresh
+  - **Prompt Management**: View, edit, reset, and refresh AI prompts (admin-only)
+- **Health & Metrics** (`/health`): Real-time system monitoring and cost tracking with:
+  - **Drag & Drop Interface**: Reorder metric cards by dragging
+  - **Persistent Layout**: Custom card order saved across sessions
+  - **Visual Feedback**: Drag handles and smooth animations
+  - **Touch Support**: Mobile-friendly drag and drop gestures
 
 ## Technical Architecture
 
@@ -340,13 +441,49 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
 - **OpenAI Integration**: Direct API integration with token usage tracking
 - **Exception Handling**: Custom exceptions with proper error propagation
 - **Clean Code Principles**: Following Uncle Bob's Clean Code guidelines with small functions, meaningful names, and DRY principles
+- **Admin Security**: Spring Security with role-based access control for admin functions
+- **File Management**: Dynamic prompt file reading and writing with cache synchronization
 
 ### Frontend Architecture
 - **React 18**: Modern React with hooks and functional components
 - **Chakra UI**: Component library with built-in theming and accessibility
 - **React Router**: Client-side routing with nested routes
 - **Axios**: HTTP client for API communication
+- **@dnd-kit**: Modern drag and drop library with touch and keyboard support
 - **Responsive Design**: Mobile-first approach with breakpoint-based layouts
+
+## Drag & Drop Health Dashboard
+
+The Health & Metrics page features an advanced **drag and drop interface** that allows users to customize their dashboard layout:
+
+### Features
+- **11 Draggable Cards**: All metric cards can be reordered to match user preferences
+- **Visual Drag Handles**: Intuitive drag indicators (⋮⋮) on each card
+- **Smooth Animations**: CSS transitions provide fluid reordering experience
+- **Persistent Storage**: Card order is automatically saved to localStorage
+- **Cross-Session Memory**: Custom layout persists between browser sessions
+- **Touch Support**: Full mobile and tablet drag and drop functionality
+- **Keyboard Navigation**: Accessible drag and drop with keyboard controls
+
+### Available Cards
+1. **System Health**: Backend status and component health
+2. **GenAI Operations**: Total LLM API calls made
+3. **Token Usage**: Input/output token consumption
+4. **API Costs**: Real-time cost calculation
+5. **Input Tokens**: Prompt token usage
+6. **Output Tokens**: Response token usage
+7. **Operation Details**: GenAI operation metadata
+8. **Token Details**: Token usage metadata
+9. **Pricing Information**: Current OpenAI pricing
+10. **Latest AI Call**: Most recent API call details
+11. **Health Details**: Component-by-component health status
+
+### How to Use
+1. Navigate to the Health page (`/health`)
+2. Look for the drag handle (⋮⋮) in the top-right of each card
+3. Click and drag any card to reorder them
+4. Release to drop the card in its new position
+5. Your custom order will be automatically saved and restored on future visits
 
 ## Notes
 
@@ -356,6 +493,11 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
 - **Cost tracking is automatic** and based on actual token usage from OpenAI API responses.
 - **All metrics are exposed** via Spring Boot Actuator for monitoring and alerting.
 - **Pricing is configurable** via environment variables for different OpenAI models.
+- **Prompt management is admin-only** and requires authentication for security.
+- **All prompt changes are persistent** and saved to files for durability.
+- **Admin credentials should be changed** in production environments.
+- **Health dashboard layout is customizable** with drag and drop functionality.
+- **User preferences are automatically saved** to localStorage for persistence.
 
 ## License
 

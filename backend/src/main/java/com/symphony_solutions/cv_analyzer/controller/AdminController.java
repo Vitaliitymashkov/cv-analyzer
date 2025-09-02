@@ -1,22 +1,22 @@
 package com.symphony_solutions.cv_analyzer.controller;
 
-import com.symphony_solutions.cv_analyzer.service.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * Basic admin controller for general admin operations.
+ * Prompt management has been moved to PromptManagementController.
+ */
 @RestController
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 public class AdminController {
 
-    private final PromptService promptService;
-
-    @PostMapping("/prompts/refresh")
-    public ResponseEntity<String> refreshPrompts() {
-        promptService.refresh();
-        return ResponseEntity.ok("Prompts reloaded");
+    @GetMapping("/status")
+    public ResponseEntity<String> getAdminStatus() {
+        return ResponseEntity.ok("Admin panel is accessible");
     }
 }
