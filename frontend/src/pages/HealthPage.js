@@ -43,6 +43,21 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+// Default card order - defined outside component to prevent infinite re-renders
+const defaultCardOrder = [
+    'system-health',
+    'genai-operations',
+    'token-usage',
+    'api-costs',
+    'input-tokens',
+    'output-tokens',
+    'operation-details',
+    'token-details',
+    'pricing-info',
+    'latest-ai-call',
+    'health-details'
+];
+
 // Sortable Card Component
 function SortableCard({ id, children, cardBg, cardBorder }) {
     const {
@@ -102,21 +117,6 @@ function HealthPage() {
     const cardBg = useColorModeValue('white', 'gray.800');
     const cardBorder = useColorModeValue('gray.200', 'gray.700');
 
-    // Default card order
-    const defaultCardOrder = [
-        'system-health',
-        'genai-operations',
-        'token-usage',
-        'api-costs',
-        'input-tokens',
-        'output-tokens',
-        'operation-details',
-        'token-details',
-        'pricing-info',
-        'latest-ai-call',
-        'health-details'
-    ];
-
     // Load card order from localStorage on component mount
     useEffect(() => {
         const savedOrder = localStorage.getItem('health-page-card-order');
@@ -130,7 +130,7 @@ function HealthPage() {
         } else {
             setCardOrder(defaultCardOrder);
         }
-    }, [defaultCardOrder]);
+    }, []); // Empty dependency array since defaultCardOrder is now stable
 
     // Save card order to localStorage whenever it changes
     useEffect(() => {
