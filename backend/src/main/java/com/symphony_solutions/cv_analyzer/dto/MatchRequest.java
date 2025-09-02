@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchRequest {
+
     private String vacancyDescription;
     // Optionally, add more fields if needed
 }

@@ -5,10 +5,12 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.core.env.Environment;
 
 @Slf4j
 @SpringBootApplication
+@EnableAspectJAutoProxy
 public class CandidateMatcherApplication {
 
 	public static void main(String[] args) {

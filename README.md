@@ -16,13 +16,21 @@ A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy 
 - Uses OpenAI (or compatible) LLM to generate fit summaries and ratings
 - Externalized prompt templates with System/User roles for robust, tunable inference
 - **GenAI metrics exposed via Spring Boot Actuator endpoints for LLM usage monitoring**
+- **Real-time cost tracking with actual token usage via Aspect-Oriented Programming (AOP)**
+- **Configurable OpenAI pricing with automatic cost calculation**
+- **Health monitoring and system metrics via Spring Boot Actuator**
 
 ### Frontend Features
-- Modern React web interface
+- **Modern React web interface with Chakra UI components**
+- **Responsive sidebar navigation with collapsible menu**
+- **Dark/Light theme toggle with persistent user preference**
 - Upload and manage CV files
 - Submit job descriptions for candidate matching
 - View candidate summaries and ratings
-- Responsive design for desktop and mobile
+- **Real-time Health & Metrics dashboard with auto-refresh**
+- **GenAI cost tracking and token usage visualization**
+- **System health monitoring with detailed component status**
+- Responsive design for desktop, tablet, and mobile
 
 ## Prerequisites
 
@@ -54,6 +62,13 @@ Create a `.env` file in the project root:
 OPENAI_API_KEY=sk-...your-key...
 ```
 
+**Optional: Configure OpenAI pricing (defaults to GPT-4o pricing)**
+```
+OPENAI_PRICING_INPUT=0.1
+OPENAI_PRICING_OUTPUT=0.4
+OPENAI_PRICING_CURRENCY=USD
+```
+
 3. **Add candidate CVs**
 
 Place `.pdf` and/or `.txt` files in:
@@ -81,6 +96,8 @@ docker-compose up -d
 The application will be available at:
 - **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:8080
+- **Health & Metrics Dashboard**: http://localhost:3000/health
+- **Admin Panel**: http://localhost:3000/admin
 
 **Other useful Docker commands:**
 ```bash
@@ -123,12 +140,23 @@ The backend will start on [http://localhost:8080](http://localhost:8080) and the
 cv-analyzer/
 ├── backend/                 # Spring Boot application
 │   ├── src/main/java/      # Java source code
+│   │   ├── aspect/         # AOP aspects for cross-cutting concerns
+│   │   ├── config/         # Spring configuration classes
+│   │   ├── controller/     # REST controllers
+│   │   ├── dto/           # Data Transfer Objects
+│   │   ├── exception/     # Custom exception classes
+│   │   ├── model/         # Domain models and internal data structures
+│   │   └── service/       # Business logic services
 │   ├── src/main/resources/ # Configuration and resources
 │   │   ├── cvs/           # CV files directory
-│   │   └── prompts/       # AI prompt templates
+│   │   ├── prompts/       # AI prompt templates
+│   │   └── application.properties # Application configuration
 │   └── Dockerfile         # Backend Docker configuration
 ├── frontend/               # React application
 │   ├── src/               # React source code
+│   │   ├── components/    # Reusable UI components
+│   │   ├── pages/         # Page components
+│   │   └── App.js         # Main application component
 │   ├── public/            # Static assets
 │   └── Dockerfile         # Frontend Docker configuration
 ├── docker-compose.yml     # Production Docker setup
@@ -173,16 +201,73 @@ curl -X POST http://localhost:8080/api/candidate-matcher/match \
   -d '{"vacancyDescription": "Looking for a Java developer with Spring Boot and PDF processing experience."}'
 ```
 
+### Cost Metrics Endpoint
+
+**GET** `/api/cost/metrics`
+
+**Response:**
+```json
+{
+  "totalCost": 0.0045,
+  "totalInputTokens": 1360,
+  "totalOutputTokens": 114,
+  "pricing": {
+    "inputTokensPerMillion": 0.1,
+    "outputTokensPerMillion": 0.4,
+    "currency": "USD"
+  }
+}
+```
+
+### Pricing Information Endpoint
+
+**GET** `/api/cost/pricing`
+
+**Response:**
+```json
+{
+  "inputTokensPerMillion": 0.1,
+  "outputTokensPerMillion": 0.4,
+  "currency": "USD"
+}
+```
+
 ### GenAI Metrics via Actuator
 
 Spring Boot Actuator exposes health, info, and metrics endpoints.  
 GenAI metrics are available at:
 
-- `/actuator/metrics/gen_ai.client.operation`
-- `/actuator/metrics/gen_ai.client.operation.active`
-- `/actuator/metrics/gen_ai.client.token.usage`
+- `/actuator/health` - System health status
+- `/actuator/metrics/gen_ai.client.operation` - Total LLM operations
+- `/actuator/metrics/gen_ai.client.operation.active` - Active operations
+- `/actuator/metrics/gen_ai.client.token.usage` - Token usage statistics
+- `/api/cost/metrics` - **Real-time cost tracking with actual token usage**
+- `/api/cost/pricing` - **Current pricing configuration**
 
-These endpoints provide insights into LLM usage and performance.
+These endpoints provide insights into LLM usage, performance, and costs.
+
+### Health & Metrics Dashboard
+
+The application includes a comprehensive **Health & Metrics Dashboard** accessible at `/health` that provides:
+
+- **System Health Status**: Real-time backend health monitoring
+- **GenAI Operations**: Total LLM API calls made
+- **Token Usage**: Input/output token consumption with detailed breakdown
+- **Cost Tracking**: Real-time cost calculation based on actual token usage
+- **Pricing Information**: Current OpenAI pricing configuration
+- **Auto-refresh**: Updates every 30 seconds automatically
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+### Cost Tracking Features
+
+The application now includes **comprehensive cost tracking**:
+
+- **Real-time Token Usage**: Tracks actual input/output tokens from OpenAI API responses
+- **Automatic Cost Calculation**: Uses configurable pricing to calculate costs
+- **AOP-based Tracking**: Uses Aspect-Oriented Programming for clean separation of concerns
+- **Micrometer Integration**: Exposes cost metrics via Spring Boot Actuator
+- **Configurable Pricing**: Set custom pricing via environment variables
+- **Historical Tracking**: Maintains cumulative cost and token usage
 
 ## Prompt customization (System/User roles)
 
@@ -233,11 +318,44 @@ export ADMIN_PASSWORD=strongsecret
 curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admin/prompts/refresh
 ```
 
+## User Interface Features
+
+### Navigation & Theming
+- **Collapsible Sidebar**: Responsive navigation menu that adapts to screen size
+- **Dark/Light Theme**: Toggle between themes with persistent user preference
+- **Mobile-First Design**: Optimized for mobile, tablet, and desktop viewing
+- **Chakra UI Components**: Modern, accessible UI components throughout
+
+### Pages & Functionality
+- **Candidate Search** (`/`): Main page for job description input and candidate matching
+- **Admin Panel** (`/admin`): Prompt refresh and administrative functions
+- **Health & Metrics** (`/health`): Real-time system monitoring and cost tracking
+
+## Technical Architecture
+
+### Backend Architecture
+- **Spring Boot**: REST API with embedded Tomcat server
+- **Aspect-Oriented Programming (AOP)**: Clean separation of cross-cutting concerns like cost tracking
+- **Micrometer**: Metrics collection and exposure via Spring Boot Actuator
+- **OpenAI Integration**: Direct API integration with token usage tracking
+- **Exception Handling**: Custom exceptions with proper error propagation
+- **Clean Code Principles**: Following Uncle Bob's Clean Code guidelines with small functions, meaningful names, and DRY principles
+
+### Frontend Architecture
+- **React 18**: Modern React with hooks and functional components
+- **Chakra UI**: Component library with built-in theming and accessibility
+- **React Router**: Client-side routing with nested routes
+- **Axios**: HTTP client for API communication
+- **Responsive Design**: Mobile-first approach with breakpoint-based layouts
+
 ## Notes
 
 - The OpenAI API key is required for LLM-powered summaries and ratings.
 - The app supports both `.pdf` and `.txt` CVs.
 - Summaries and ratings are generated per candidate using the LLM.
+- **Cost tracking is automatic** and based on actual token usage from OpenAI API responses.
+- **All metrics are exposed** via Spring Boot Actuator for monitoring and alerting.
+- **Pricing is configurable** via environment variables for different OpenAI models.
 
 ## License
 

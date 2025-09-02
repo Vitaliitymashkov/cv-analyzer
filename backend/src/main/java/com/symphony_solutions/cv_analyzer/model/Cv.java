@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Cv {
+
     private String name;
+
     private String content;
+
     private String filename;
 } 

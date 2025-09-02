@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Box, VStack, Text, useColorModeValue } from '@chakra-ui/react';
-import { SearchIcon, SettingsIcon } from '@chakra-ui/icons';
+import { SearchIcon, SettingsIcon, InfoIcon } from '@chakra-ui/icons';
 
 function Navigation({ isOpen, onNavigate }) {
     const bg = useColorModeValue('white', 'gray.800');
@@ -67,6 +67,24 @@ function Navigation({ isOpen, onNavigate }) {
                     >
                         <SettingsIcon />
                         <Text>Admin</Text>
+                    </Box>
+                    <Box
+                        as={NavLink}
+                        to="/health"
+                        onClick={onNavigate}
+                        p={3}
+                        borderRadius="md"
+                        _hover={{ bg: activeBg }}
+                        _activeLink={{ bg: activeBg, color: activeColor }}
+                        display="flex"
+                        alignItems="center"
+                        gap={3}
+                        color={textColor}
+                        textDecoration="none"
+                        transition="all 0.2s"
+                    >
+                        <InfoIcon />
+                        <Text>Health & Metrics</Text>
                     </Box>
                 </VStack>
             </VStack>

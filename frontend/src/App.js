@@ -4,6 +4,7 @@ import './App.css';
 import Navigation from './components/Navigation';
 import MatcherPage from './pages/MatcherPage';
 import AdminPage from './pages/AdminPage';
+import HealthPage from './pages/HealthPage';
 import { Box, Flex, Heading, IconButton, useColorMode, useColorModeValue } from '@chakra-ui/react';
 import { SunIcon, MoonIcon, HamburgerIcon } from '@chakra-ui/icons';
 
@@ -53,6 +54,7 @@ function App() {
                     <Routes>
                         <Route path="/" element={<MatcherPage />} />
                         <Route path="/admin" element={<AdminPage />} />
+                        <Route path="/health" element={<HealthPage />} />
                     </Routes>
                 </Box>
             </Box>

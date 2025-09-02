@@ -1,5 +1,6 @@
 package com.symphony_solutions.cv_analyzer.service;
 
+import com.symphony_solutions.cv_analyzer.exception.CvParsingException;
 import com.symphony_solutions.cv_analyzer.model.Cv;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -36,11 +37,21 @@ public class CvService {
      * Returns the top N candidates most relevant to the vacancy description.
      */
     public List<Cv> findTopCandidates(String vacancyDescription, int limit) {
-        String[] keywords = vacancyDescription.toLowerCase().split("\\W+");
-        return loadAllCvs().stream()
-                .sorted(Comparator.comparingInt((Cv cv) -> matchScore(cv, keywords)).reversed())
+        String[] keywords = extractKeywords(vacancyDescription);
+        List<Cv> allCvs = loadAllCvs();
+        
+        return allCvs.stream()
+                .sorted(byRelevanceScore(keywords))
                 .limit(limit)
                 .toList();
+    }
+    
+    private String[] extractKeywords(String vacancyDescription) {
+        return vacancyDescription.toLowerCase().split("\\W+");
+    }
+    
+    private Comparator<Cv> byRelevanceScore(String[] keywords) {
+        return Comparator.comparingInt((Cv cv) -> matchScore(cv, keywords)).reversed();
     }
 
     private List<Cv> loadTextCvs() {
@@ -70,26 +81,30 @@ public class CvService {
     private Cv parseTextCv(Resource resource) {
         try (BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
             String filename = Optional.ofNullable(resource.getFilename()).orElse("Unknown");
-            String name = filename.replace(".txt", "");
+            String name = extractNameFromFilename(filename, ".txt");
             String content = reader.lines().collect(Collectors.joining("\n"));
             return new Cv(name, content, filename);
         } catch (Exception e) {
-            log.warn("Failed to parse text CV: {}", resource.getFilename(), e);
-            return null;
+            log.error("Failed to parse text CV: {}", resource.getFilename(), e);
+            throw new CvParsingException("Failed to parse text CV: " + resource.getFilename(), e);
         }
     }
 
     private Cv parsePdfCv(Resource resource) {
         try (PDDocument document = PDDocument.load(resource.getInputStream())) {
             String filename = Optional.ofNullable(resource.getFilename()).orElse("Unknown");
-            String name = filename.replace(".pdf", "");
+            String name = extractNameFromFilename(filename, ".pdf");
             PDFTextStripper pdfStripper = new PDFTextStripper();
             String content = pdfStripper.getText(document);
             return new Cv(name, content, filename);
         } catch (Exception e) {
-            log.warn("Failed to parse PDF CV: {}", resource.getFilename(), e);
-            return null;
+            log.error("Failed to parse PDF CV: {}", resource.getFilename(), e);
+            throw new CvParsingException("Failed to parse PDF CV: " + resource.getFilename(), e);
         }
+    }
+    
+    private String extractNameFromFilename(String filename, String extension) {
+        return filename.replace(extension, "");
     }
 
     private int matchScore(Cv cv, String[] keywords) {

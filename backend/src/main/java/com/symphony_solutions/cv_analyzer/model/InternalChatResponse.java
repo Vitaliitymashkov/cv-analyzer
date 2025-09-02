@@ -1,0 +1,38 @@
+package com.symphony_solutions.cv_analyzer.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+/**
+ * Internal model for chat responses that includes both content and token usage statistics.
+ * This eliminates the need for thread-local storage and provides a clean way to pass
+ * token usage information to AOP aspects.
+ */
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class InternalChatResponse {
+    
+    /**
+     * The actual response content (text)
+     */
+    private String content;
+    
+    /**
+     * Number of input/prompt tokens used
+     */
+    private int inputTokens;
+    
+    /**
+     * Number of output/completion tokens used
+     */
+    private int outputTokens;
+     
+    /**
+     * Get total tokens used (input + output)
+     */
+    public int getTotalTokens() {
+        return inputTokens + outputTokens;
+    }
+}
