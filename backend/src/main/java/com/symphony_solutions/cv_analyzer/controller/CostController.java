@@ -1,12 +1,11 @@
 package com.symphony_solutions.cv_analyzer.controller;
 
 import com.symphony_solutions.cv_analyzer.service.CostCalculationService;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import lombok.RequiredArgsConstructor;
-import java.math.BigDecimal;
-import java.util.Map;
 
 /**
  * REST controller for cost-related metrics and information.

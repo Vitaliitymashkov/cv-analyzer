@@ -3,6 +3,7 @@ package com.symphony_solutions.cv_analyzer.service;
 import com.symphony_solutions.cv_analyzer.config.RatingConfig;
 import com.symphony_solutions.cv_analyzer.dto.PromptDto;
 import com.symphony_solutions.cv_analyzer.dto.PromptUpdateRequest;
+import com.symphony_solutions.cv_analyzer.dto.PromptType;
 import com.symphony_solutions.cv_analyzer.exception.PromptManagementException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -102,25 +103,34 @@ public class PromptService {
      */
     public List<PromptDto> getAllPrompts() {
         List<PromptDto> prompts = new ArrayList<>();
-        
-        prompts.add(new PromptDto("summary", "system", cachedSummarySystem, summarySystemPath, true));
-        prompts.add(new PromptDto("summary", "user", cachedSummaryUser, summaryUserPath, true));
-        prompts.add(new PromptDto("rating", "system", cachedRatingSystem, ratingSystemPath, true));
-        prompts.add(new PromptDto("rating", "user", cachedRatingUser, ratingUserPath, true));
-        
+        prompts.add(new PromptDto(PromptType.SUMMARY, "system", cachedSummarySystem, summarySystemPath, true));
+        prompts.add(new PromptDto(PromptType.SUMMARY, "user", cachedSummaryUser, summaryUserPath, true));
+        prompts.add(new PromptDto(PromptType.RATING, "system", cachedRatingSystem, ratingSystemPath, true));
+        prompts.add(new PromptDto(PromptType.RATING, "user", cachedRatingUser, ratingUserPath, true));
         return prompts;
     }
     
     /**
      * Get a specific prompt by type and role.
      */
-    public PromptDto getPrompt(String type, String role) {
-        return switch (type + "_" + role) {
-            case "summary_system" -> new PromptDto("summary", "system", cachedSummarySystem, summarySystemPath, true);
-            case "summary_user" -> new PromptDto("summary", "user", cachedSummaryUser, summaryUserPath, true);
-            case "rating_system" -> new PromptDto("rating", "system", cachedRatingSystem, ratingSystemPath, true);
-            case "rating_user" -> new PromptDto("rating", "user", cachedRatingUser, ratingUserPath, true);
-            default -> throw new PromptManagementException("Invalid prompt type or role: " + type + "/" + role);
+    public PromptDto getPrompt(String typeStr, String role) {
+        PromptType type;
+        try {
+            type = PromptType.valueOf(typeStr.toUpperCase());
+        } catch (Exception e) {
+            throw new PromptManagementException("Invalid prompt type: " + typeStr);
+        }
+        return switch (type) {
+            case SUMMARY -> switch (role) {
+                case "system" -> new PromptDto(PromptType.SUMMARY, "system", cachedSummarySystem, summarySystemPath, true);
+                case "user" -> new PromptDto(PromptType.SUMMARY, "user", cachedSummaryUser, summaryUserPath, true);
+                default -> throw new PromptManagementException("Invalid role: " + role);
+            };
+            case RATING -> switch (role) {
+                case "system" -> new PromptDto(PromptType.RATING, "system", cachedRatingSystem, ratingSystemPath, true);
+                case "user" -> new PromptDto(PromptType.RATING, "user", cachedRatingUser, ratingUserPath, true);
+                default -> throw new PromptManagementException("Invalid role: " + role);
+            };
         };
     }
     
@@ -129,23 +139,16 @@ public class PromptService {
      */
     public synchronized PromptDto updatePrompt(PromptUpdateRequest request) {
         validatePromptUpdateRequest(request);
-        
-        String filePath = getFilePath(request.getType(), request.getRole());
+        PromptType type = request.getType();
+        String filePath = getFilePath(type, request.getRole());
         String content = request.getContent();
-        
         try {
-            // Write to file
             writeToFile(filePath, content);
-            
-            // Update cache
-            updateCache(request.getType(), request.getRole(), content);
-            
-            log.info("Successfully updated prompt: {}/{}", request.getType(), request.getRole());
-            
-            return new PromptDto(request.getType(), request.getRole(), content, filePath, true);
-            
+            updateCache(type, request.getRole(), content);
+            log.info("Successfully updated prompt: {}/{}", type, request.getRole());
+            return new PromptDto(type, request.getRole(), content, filePath, true);
         } catch (Exception e) {
-            log.error("Failed to update prompt: {}/{}", request.getType(), request.getRole(), e);
+            log.error("Failed to update prompt: {}/{}", type, request.getRole(), e);
             throw new PromptManagementException("Failed to update prompt: " + e.getMessage(), e);
         }
     }
@@ -153,21 +156,20 @@ public class PromptService {
     /**
      * Reset a prompt to its default value from the classpath resource.
      */
-    public synchronized PromptDto resetPrompt(String type, String role) {
+    public synchronized PromptDto resetPrompt(String typeStr, String role) {
+        PromptType type;
+        try {
+            type = PromptType.valueOf(typeStr.toUpperCase());
+        } catch (Exception e) {
+            throw new PromptManagementException("Invalid prompt type: " + typeStr);
+        }
         String filePath = getFilePath(type, role);
         String originalContent = readResource(filePath);
-        
         try {
-            // Write original content back to file
             writeToFile(filePath, originalContent);
-            
-            // Update cache
             updateCache(type, role, originalContent);
-            
             log.info("Successfully reset prompt: {}/{}", type, role);
-            
             return new PromptDto(type, role, originalContent, filePath, true);
-            
         } catch (Exception e) {
             log.error("Failed to reset prompt: {}/{}", type, role, e);
             throw new PromptManagementException("Failed to reset prompt: " + e.getMessage(), e);
@@ -178,8 +180,8 @@ public class PromptService {
         if (request == null) {
             throw new PromptManagementException("Prompt update request cannot be null");
         }
-        if (request.getType() == null || request.getType().trim().isEmpty()) {
-            throw new PromptManagementException("Prompt type cannot be null or empty");
+        if (request.getType() == null) {
+            throw new PromptManagementException("Prompt type cannot be null");
         }
         if (request.getRole() == null || request.getRole().trim().isEmpty()) {
             throw new PromptManagementException("Prompt role cannot be null or empty");
@@ -187,38 +189,40 @@ public class PromptService {
         if (request.getContent() == null) {
             throw new PromptManagementException("Prompt content cannot be null");
         }
-        if (!isValidPromptType(request.getType())) {
-            throw new PromptManagementException("Invalid prompt type: " + request.getType());
-        }
         if (!isValidPromptRole(request.getRole())) {
             throw new PromptManagementException("Invalid prompt role: " + request.getRole());
         }
-    }
-    
-    private boolean isValidPromptType(String type) {
-        return "summary".equals(type) || "rating".equals(type);
     }
     
     private boolean isValidPromptRole(String role) {
         return "system".equals(role) || "user".equals(role);
     }
     
-    private String getFilePath(String type, String role) {
-        return switch (type + "_" + role) {
-            case "summary_system" -> summarySystemPath;
-            case "summary_user" -> summaryUserPath;
-            case "rating_system" -> ratingSystemPath;
-            case "rating_user" -> ratingUserPath;
-            default -> throw new PromptManagementException("Invalid prompt type or role: " + type + "/" + role);
+    private String getFilePath(PromptType type, String role) {
+        return switch (type) {
+            case SUMMARY -> switch (role) {
+                case "system" -> summarySystemPath;
+                case "user" -> summaryUserPath;
+                default -> throw new PromptManagementException("Invalid prompt role: " + role);
+            };
+            case RATING -> switch (role) {
+                case "system" -> ratingSystemPath;
+                case "user" -> ratingUserPath;
+                default -> throw new PromptManagementException("Invalid prompt role: " + role);
+            };
         };
     }
     
-    private void updateCache(String type, String role, String content) {
-        switch (type + "_" + role) {
-            case "summary_system" -> cachedSummarySystem = content;
-            case "summary_user" -> cachedSummaryUser = content;
-            case "rating_system" -> cachedRatingSystem = content;
-            case "rating_user" -> cachedRatingUser = content;
+    private void updateCache(PromptType type, String role, String content) {
+        switch (type) {
+            case SUMMARY -> {
+                if ("system".equals(role)) cachedSummarySystem = content;
+                else if ("user".equals(role)) cachedSummaryUser = content;
+            }
+            case RATING -> {
+                if ("system".equals(role)) cachedRatingSystem = content;
+                else if ("user".equals(role)) cachedRatingUser = content;
+            }
         }
     }
     
@@ -242,4 +246,4 @@ public class PromptService {
         
         log.debug("Written prompt content to file: {}", resourcePath);
     }
-} 
+}

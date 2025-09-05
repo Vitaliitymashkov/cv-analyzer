@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 public class PromptDto {
     
     /**
-     * The prompt type (e.g., "summary", "rating")
+     * The prompt type (e.g., SUMMARY, RATING)
      */
-    private String type;
-    
+    private PromptType type;
+
     /**
      * The prompt role (e.g., "system", "user")
      */

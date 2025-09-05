@@ -3,7 +3,6 @@ package com.symphony_solutions.cv_analyzer.exception;
 import com.symphony_solutions.cv_analyzer.dto.ErrorResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.retry.NonTransientAiException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -51,8 +50,8 @@ public class GlobalExceptionHandler {
     /**
      * Handle CV parsing exceptions
      */
-    @ExceptionHandler(CvParsingException.class)
-    public ResponseEntity<ErrorResponse> handleCvParsingException(CvParsingException ex) {
+    @ExceptionHandler(ResumeParsingException.class)
+    public ResponseEntity<ErrorResponse> handleCvParsingException(ResumeParsingException ex) {
         log.error("CV parsing error: {}", ex.getMessage());
         return ResponseEntity.badRequest()
                 .body(ErrorResponse.of(400, "Bad Request", "Failed to process CV file: " + ex.getMessage()));

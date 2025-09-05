@@ -28,11 +28,4 @@ public class InternalChatResponse {
      * Number of output/completion tokens used
      */
     private int outputTokens;
-     
-    /**
-     * Get total tokens used (input + output)
-     */
-    public int getTotalTokens() {
-        return inputTokens + outputTokens;
-    }
 }

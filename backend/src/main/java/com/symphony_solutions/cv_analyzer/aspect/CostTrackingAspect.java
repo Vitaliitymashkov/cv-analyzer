@@ -65,23 +65,20 @@ public class CostTrackingAspect {
     }
     
     private void recordEstimatedCost(String methodName) {
-        switch (methodName) {
-            case "generateSummary" -> {
-                costCalculationService.calculateAndRecordCost(
-                    ESTIMATED_INPUT_TOKENS_SUMMARY, 
-                    ESTIMATED_OUTPUT_TOKENS_SUMMARY
-                );
-                log.info("[Cost Tracker]: Cost tracked for generateSummary (estimated) - {} input, {} output tokens",
-                    ESTIMATED_INPUT_TOKENS_SUMMARY, ESTIMATED_OUTPUT_TOKENS_SUMMARY);
-            }
-            case "generateRating" -> {
-                costCalculationService.calculateAndRecordCost(
-                    ESTIMATED_INPUT_TOKENS_RATING, 
-                    ESTIMATED_OUTPUT_TOKENS_RATING
-                );
-                log.info("[Cost Tracker]: Cost tracked for generateRating (estimated) - {} input, {} output tokens",
-                    ESTIMATED_INPUT_TOKENS_RATING, ESTIMATED_OUTPUT_TOKENS_RATING);
-            }
-        }
+      if (methodName.equals("generateSummary")) {
+        costCalculationService.calculateAndRecordCost(
+            ESTIMATED_INPUT_TOKENS_SUMMARY,
+            ESTIMATED_OUTPUT_TOKENS_SUMMARY
+        );
+        log.info("[Cost Tracker]: Cost tracked for generateSummary (estimated) - {} input, {} output tokens",
+            ESTIMATED_INPUT_TOKENS_SUMMARY, ESTIMATED_OUTPUT_TOKENS_SUMMARY);
+      } else if (methodName.equals("generateRating")) {
+        costCalculationService.calculateAndRecordCost(
+            ESTIMATED_INPUT_TOKENS_RATING,
+            ESTIMATED_OUTPUT_TOKENS_RATING
+        );
+        log.info("[Cost Tracker]: Cost tracked for generateRating (estimated) - {} input, {} output tokens",
+            ESTIMATED_INPUT_TOKENS_RATING, ESTIMATED_OUTPUT_TOKENS_RATING);
+      }
     }
 }
