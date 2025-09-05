@@ -1,5 +1,7 @@
 package com.symphony_solutions.cv_analyzer.dto;
 
+import com.symphony_solutions.cv_analyzer.dto.type.PromptRole;
+import com.symphony_solutions.cv_analyzer.dto.type.PromptType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,10 +20,10 @@ public class PromptUpdateRequest {
     private PromptType type;
 
     /**
-     * The prompt role (e.g., "system", "user")
+     * The prompt role (e.g., SYSTEM, USER)
      */
-    private String role;
-    
+    private PromptRole role;
+
     /**
      * The new prompt content
      */
