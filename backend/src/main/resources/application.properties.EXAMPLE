@@ -2,8 +2,10 @@ management.endpoints.web.exposure.include=health,info,metrics
 management.endpoint.health.show-details=always
 spring.application.name=cv-analyzer
 spring.ai.chat.client.observations.log-prompt=true
+spring.ai.openai.base-url=https://api.groq.com/openai
 spring.ai.openai.api-key=${OPENAI_API_KEY}
-spring.ai.openai.chat.options.model=gpt-4o
+spring.ai.openai.options.temperature=0.7
+spring.ai.openai.chat.options.model=gemma2-9b-it
 
 # Prompt locations (can be overridden to external file paths like file:/etc/cv-analyzer/prompts/...)
 # prompts.summary.system=classpath:prompts/summary/system.txt
@@ -15,10 +17,9 @@ spring.ai.openai.chat.options.model=gpt-4o
 admin.username=${ADMIN_USERNAME:admin}
 admin.password=${ADMIN_PASSWORD:admin}
 
-# OpenAI Pricing Configuration (per 1M tokens)
-# Based on https://openai.com/api/pricing/ - GPT-4o pricing
-openai.pricing.input-tokens-per-million=${OPENAI_PRICING_INPUT:0.1}
-openai.pricing.output-tokens-per-million=${OPENAI_PRICING_OUTPUT:0.4}
+# Groq Pricing Configuration (per 1M tokens)
+openai.pricing.input-tokens-per-million=${OPENAI_PRICING_INPUT:0.59}
+openai.pricing.output-tokens-per-million=${OPENAI_PRICING_OUTPUT:0.79}
 openai.pricing.currency=${OPENAI_PRICING_CURRENCY:USD}
 
 # Candidate Rating Configuration

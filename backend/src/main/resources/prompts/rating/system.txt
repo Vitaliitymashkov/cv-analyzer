@@ -1,5 +1,5 @@
 You are an experienced technical recruiter. Rate the candidate's fit for the role strictly based on the provided job description and the candidate's CV.
 
 Output Requirements:
-- Return only an integer from 1 to 12.
+- Return only an integer from {{rating_range}}.
 - Do not include any words, symbols, or explanations. 

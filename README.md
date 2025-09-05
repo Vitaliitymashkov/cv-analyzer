@@ -15,6 +15,9 @@ A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy 
 - REST API to find the best-matching candidates for a job description
 - Uses OpenAI (or compatible) LLM to generate fit summaries and ratings
 - Externalized prompt templates with System/User roles for robust, tunable inference
+- **Simplified error handling with user-friendly messages**
+- **Proper AI service error classification (rate limits, authentication, etc.)**
+- **Clean validation error messages without technical details**
 - **GenAI metrics exposed via Spring Boot Actuator endpoints for LLM usage monitoring**
 - **Real-time cost tracking with actual token usage via Aspect-Oriented Programming (AOP)**
 - **Configurable OpenAI pricing with automatic cost calculation**
@@ -27,7 +30,9 @@ A full-stack application that matches candidate CVs (PDF or TXT) to job vacancy 
 - **Dark/Light theme toggle with persistent user preference**
 - Upload and manage CV files
 - Submit job descriptions for candidate matching
-- View candidate summaries and ratings
+- **Visual candidate ratings with circular progress gauges**
+- **Candidate sorting from best match to worst**
+- **Enhanced error handling with user-friendly messages**
 - **Real-time Health & Metrics dashboard with auto-refresh**
 - **GenAI cost tracking and token usage visualization**
 - **System health monitoring with detailed component status**
@@ -191,7 +196,9 @@ cv-analyzer/
     "name": "John Doe",
     "filename": "john_doe.pdf",
     "summary": "John has extensive experience in Java and Spring Boot, as well as hands-on PDF processing. This makes him an excellent fit for the role described.",
-    "rating": 11
+    "rating": 85,
+    "minRating": 1,
+    "maxRating": 100
   },
   ...
 ]
@@ -203,6 +210,37 @@ cv-analyzer/
 curl -X POST http://localhost:8080/api/candidate-matcher/match \
   -H "Content-Type: application/json" \
   -d '{"vacancyDescription": "Looking for a Java developer with Spring Boot and PDF processing experience."}'
+```
+
+### Error Handling Examples
+
+The API now provides clean, user-friendly error messages:
+
+**Validation Error (Short Description):**
+```json
+{
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Validation failed: Vacancy description must be between 10 and 10000 characters"
+}
+```
+
+**Rate Limit Error:**
+```json
+{
+  "status": 429,
+  "error": "Too Many Requests",
+  "message": "AI service rate limit exceeded. Please try again later."
+}
+```
+
+**Authentication Error:**
+```json
+{
+  "status": 401,
+  "error": "Unauthorized",
+  "message": "Invalid API key. Please check your configuration."
+}
 ```
 
 ### Cost Metrics Endpoint
@@ -423,6 +461,10 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
 
 ### Pages & Functionality
 - **Candidate Search** (`/`): Main page for job description input and candidate matching
+  - **Visual Rating Display**: Circular progress gauges showing candidate ratings (1-100)
+  - **Candidate Sorting**: Sort candidates by rating (best to worst), name, or filename
+  - **Enhanced Error Handling**: User-friendly error messages with clear actions
+  - **Input Validation**: Real-time validation with helpful error messages
 - **Admin Panel** (`/admin`): Comprehensive admin interface with tabbed sections:
   - **System Management**: General admin operations and prompt refresh
   - **Prompt Management**: View, edit, reset, and refresh AI prompts (admin-only)
@@ -431,6 +473,26 @@ curl -u "$ADMIN_USERNAME:$ADMIN_PASSWORD" -X POST http://localhost:8080/api/admi
   - **Persistent Layout**: Custom card order saved across sessions
   - **Visual Feedback**: Drag handles and smooth animations
   - **Touch Support**: Mobile-friendly drag and drop gestures
+
+## Recent Improvements
+
+### Enhanced User Experience
+- **Visual Rating System**: Replaced text-based ratings with interactive circular progress gauges
+- **Candidate Sorting**: Added sorting options to organize candidates by rating, name, or filename
+- **Improved Error Handling**: Simplified error messages that are user-friendly and actionable
+- **Input Validation**: Real-time validation with clear, non-technical error messages
+
+### Backend Error Handling
+- **Simplified Error Responses**: Clean, minimal error structure without technical details
+- **Proper Error Classification**: AI service errors are correctly categorized (rate limits, authentication, etc.)
+- **User-Friendly Messages**: Validation errors show only relevant information to users
+- **Consistent Error Format**: Standardized error response structure across all endpoints
+
+### Code Quality & Maintenance
+- **Removed Unused Components**: Cleaned up test files and unused code
+- **Simplified Architecture**: Reduced complexity in error handling and UI components
+- **Better Performance**: Optimized bundle size and reduced technical debt
+- **Cleaner Codebase**: Removed retry logic and complex error categorization
 
 ## Technical Architecture
 
@@ -490,6 +552,9 @@ The Health & Metrics page features an advanced **drag and drop interface** that 
 - The OpenAI API key is required for LLM-powered summaries and ratings.
 - The app supports both `.pdf` and `.txt` CVs.
 - Summaries and ratings are generated per candidate using the LLM.
+- **Visual ratings** are displayed as circular progress gauges (1-100 scale).
+- **Candidate sorting** allows organizing results by rating, name, or filename.
+- **Error handling** provides user-friendly messages without technical details.
 - **Cost tracking is automatic** and based on actual token usage from OpenAI API responses.
 - **All metrics are exposed** via Spring Boot Actuator for monitoring and alerting.
 - **Pricing is configurable** via environment variables for different OpenAI models.
@@ -498,6 +563,8 @@ The Health & Metrics page features an advanced **drag and drop interface** that 
 - **Admin credentials should be changed** in production environments.
 - **Health dashboard layout is customizable** with drag and drop functionality.
 - **User preferences are automatically saved** to localStorage for persistence.
+- **Input validation** provides real-time feedback with clear error messages.
+- **AI service errors** are properly classified (rate limits, authentication, etc.).
 
 ## License
 

@@ -1,5 +1,6 @@
 package com.symphony_solutions.cv_analyzer.service;
 
+import com.symphony_solutions.cv_analyzer.config.RatingConfig;
 import com.symphony_solutions.cv_analyzer.dto.PromptDto;
 import com.symphony_solutions.cv_analyzer.dto.PromptUpdateRequest;
 import com.symphony_solutions.cv_analyzer.exception.PromptManagementException;
@@ -30,6 +31,7 @@ import jakarta.annotation.PostConstruct;
 public class PromptService {
 
     private final ResourceLoader resourceLoader;
+    private final RatingConfig ratingConfig;
 
     @Value("${prompts.summary.system:classpath:prompts/summary/system.txt}")
     private String summarySystemPath;
@@ -66,11 +68,13 @@ public class PromptService {
     }
 
     public String getRatingSystemPrompt() {
-        return cachedRatingSystem;
+        return cachedRatingSystem.replace("{{rating_range}}", ratingConfig.getRangeDescription());
     }
 
     public String getRatingUserPrompt() {
-        return cachedRatingUser;
+        return cachedRatingUser
+                .replace("{{rating_range}}", ratingConfig.getRangeDescription())
+                .replace("{{max_rating}}", String.valueOf(ratingConfig.getMax()));
     }
 
     private void reloadAll() {

@@ -1,73 +1,101 @@
 import React, { useState } from 'react';
-import axios from 'axios';
-import { Box, Button, Heading, Text, Textarea, SimpleGrid, Spinner, Alert } from '@chakra-ui/react';
+import { Box, Button, Heading, Textarea, Select, HStack, Text, VStack } from '@chakra-ui/react';
+import { useCandidateMatching } from '../hooks/useApiCall';
+import CandidateGrid from '../components/candidate/CandidateGrid';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import EnhancedErrorAlert from '../components/common/EnhancedErrorAlert';
+import { SORT_OPTIONS } from '../utils/sortingUtils';
 
 function MatcherPage() {
     const [vacancyDescription, setVacancyDescription] = useState('');
-    const [matches, setMatches] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState('');
+    const [sortBy, setSortBy] = useState('rating-desc');
+    const [errorKey, setErrorKey] = useState(0);
+    const { matches, loading, error, matchCandidates, setError } = useCandidateMatching();
 
-    const handleMatchCandidates = async () => {
-        if (!vacancyDescription.trim()) {
-            setError('Please enter a vacancy description.');
-            return;
-        }
-        setIsLoading(true);
-        setError('');
-        setMatches([]);
-        try {
-            const response = await axios.post('/api/candidate-matcher/match', { vacancyDescription }, {
-                headers: { 'Content-Type': 'application/json' }
-            });
-            setMatches(response.data || []);
-        } catch (err) {
-            console.error("Error while searching for candidates:", err);
-            setError('Failed to find candidates.');
-        } finally {
-            setIsLoading(false);
-        }
+    const handleMatchCandidates = () => {
+        // Clear ALL errors immediately when user clicks Find Candidates
+        setError(null);
+        // Force error alert to re-render by changing its key
+        setErrorKey(prev => prev + 1);
+        // The matchCandidates function will also clear errors automatically
+        matchCandidates(vacancyDescription);
     };
+
+    const handleDescriptionChange = (e) => {
+        const value = e.target.value;
+        setVacancyDescription(value);
+        
+        // Don't clear errors when typing - only when user clicks Find Candidates
+    };
+
 
     return (
         <Box as="section" mb={8}>
             <Box display="flex" alignItems="center" justifyContent="space-between" flexWrap="wrap" gap={4} mb={4}>
                 <Heading as="h2" size="lg">Candidate Search</Heading>
-                <Button onClick={handleMatchCandidates} isDisabled={isLoading} colorScheme="purple">
-                    {isLoading ? 'Searching...' : 'Find Candidates'}
-                </Button>
+                <HStack spacing={2}>
+                    <Button onClick={handleMatchCandidates} isDisabled={loading} colorScheme="purple">
+                        {loading ? 'Searching...' : 'Find Candidates'}
+                    </Button>
+                </HStack>
             </Box>
+            
+            
             <Textarea
                 value={vacancyDescription}
-                onChange={(e) => setVacancyDescription(e.target.value)}
+                onChange={handleDescriptionChange}
                 placeholder="Paste the vacancy description here..."
                 minH="160px"
                 mb={3}
             />
-            {isLoading && (
-                <Box display="flex" alignItems="center" gap={3} mb={3} color="gray.400">
-                    <Spinner size="sm" />
-                    <Text>Searching for the best candidates...</Text>
-                </Box>
+            
+            {loading && (
+                <LoadingSpinner 
+                    message="Searching for the best candidates..." 
+                    size="sm"
+                    containerProps={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 3, 
+                        mb: 3, 
+                        color: "gray.400",
+                        minH: "auto"
+                    }}
+                />
             )}
-            {error && (
-                <Alert status="error" mb={3}>
-                    {error}
-                </Alert>
+            
+            <EnhancedErrorAlert 
+                key={errorKey}
+                error={error} 
+                showDetails={true}
+                containerProps={{ mb: 3 }} 
+            />
+            
+            {matches && matches.length > 0 && (
+                <VStack spacing={4} align="stretch" mb={6}>
+                    <HStack justify="space-between" align="center" wrap="wrap" gap={2}>
+                        <Text fontSize="sm" color="gray.600" fontWeight="medium">
+                            Sort candidates by:
+                        </Text>
+                        <Select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            size="sm"
+                            maxW="200px"
+                            bg="white"
+                            _dark={{ bg: "gray.700" }}
+                        >
+                            {Object.values(SORT_OPTIONS).map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </Select>
+                    </HStack>
+                </VStack>
             )}
-            <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4} mt={4}>
-                {matches.length > 0 && matches.map((match) => (
-                    <Box key={match.filename || match.name} bg="rgba(255,255,255,0.04)" borderWidth="1px" borderColor="rgba(255,255,255,0.12)" borderRadius="md" p={4}>
-                        <Heading as="h3" size="md" mb={2}>{match.name}</Heading>
-                        <Text fontSize="sm" color="gray.500" mb={1}><strong>File:</strong> {match.filename}</Text>
-                        <Text fontSize="sm" color="gray.500" mb={3}><strong>Rating:</strong> {match.rating}</Text>
-                        <Heading as="h4" size="sm" mb={2}>Analysis Result</Heading>
-                        <Box as="pre" whiteSpace="pre-wrap" wordBreak="break-word" bg="rgba(0,0,0,0.25)" p={3} borderRadius="sm" fontSize="sm" color="inherit">
-                            {match.summary}
-                        </Box>
-                    </Box>
-                ))}
-            </SimpleGrid>
+            
+            <CandidateGrid candidates={matches} sortBy={sortBy} />
         </Box>
     );
 }
