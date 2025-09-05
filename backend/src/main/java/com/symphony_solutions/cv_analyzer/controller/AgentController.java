@@ -24,53 +24,54 @@ import jakarta.validation.Valid;
 @Validated
 public class AgentController {
 
-    private final ResumeService resumeService;
+  private final ResumeService resumeService;
 
-    private final AgentSummaryService agentSummaryService;
+  private final AgentSummaryService agentSummaryService;
 
-    /**
-     * Returns the most relevant candidates for a given vacancy description, with LLM-generated summary and rating.
-     * @param request the vacancy description
-     * @return list of candidate summaries with individual ratings
-     */
-    @PostMapping("/match")
-    public List<CandidateSummary> matchCvs(@Valid @RequestBody MatchRequest request) {
-        log.info("Processing candidate match request for vacancy: {}", 
-                request.getVacancyDescription().substring(0, Math.min(100, request.getVacancyDescription().length())));
-        
+  /**
+   * Returns the most relevant candidates for a given vacancy description, with LLM-generated summary and rating.
+   *
+   * @param request the vacancy description
+   * @return list of candidate summaries with individual ratings
+   */
+  @PostMapping("/match")
+  public List<CandidateSummary> matchCvs(@Valid @RequestBody MatchRequest request) {
+    log.info("Processing candidate match request for vacancy: {}",
+        request.getVacancyDescription().substring(0, Math.min(100, request.getVacancyDescription().length())));
+
+    try {
+      List<Resume> topResumes = resumeService.findTopCandidates(request.getVacancyDescription(), 5);
+      List<CandidateSummary> summaries = new ArrayList<>();
+
+      for (Resume resume : topResumes) {
         try {
-            List<Resume> topResumes = resumeService.findTopCandidates(request.getVacancyDescription(), 5);
-            List<CandidateSummary> summaries = new ArrayList<>();
-            
-            for (Resume resume : topResumes) {
-                try {
-                    log.debug("Processing CV: {}", resume.getFilename());
-                    String summary = agentSummaryService.generateSummary(request.getVacancyDescription(), resume.getContent());
-                    int rating = agentSummaryService.generateRating(request.getVacancyDescription(), resume.getContent());
-                    
-                    CandidateSummary candidate = new CandidateSummary(
-                        resume.getName(),
-                        resume.getFilename(),
-                        summary,
-                        rating
-                    );
-                    summaries.add(candidate);
-                } catch (NonTransientAiException e) {
-                    log.error("AI service error processing CV: {}", resume.getFilename(), e);
-                    // Re-throw AI exceptions so they can be handled by GlobalExceptionHandler
-                    throw e;
-                } catch (Exception e) {
-                    log.error("Failed to process CV: {}", resume.getFilename(), e);
-                    // Continue with other CVs for non-AI errors
-                    // Could add a fallback candidate with error message
-                }
-            }
-            
-            log.info("Successfully processed {} candidates", summaries.size());
-            return summaries;
+          log.debug("Processing CV: {}", resume.getFilename());
+          String summary = agentSummaryService.generateSummary(request.getVacancyDescription(), resume.getContent());
+          int rating = agentSummaryService.generateRating(request.getVacancyDescription(), resume.getContent());
+
+          CandidateSummary candidate = CandidateSummary.builder()
+              .name(resume.getName())
+              .filename(resume.getFilename())
+              .summary(summary)
+              .rating(rating)
+              .build();
+          summaries.add(candidate);
+        } catch (NonTransientAiException e) {
+          log.error("AI service error processing CV: {}", resume.getFilename(), e);
+          // Re-throw AI exceptions so they can be handled by GlobalExceptionHandler
+          throw e;
         } catch (Exception e) {
-            log.error("Error in candidate matching process", e);
-            throw e; // Let GlobalExceptionHandler handle it
+          log.error("Failed to process CV: {}", resume.getFilename(), e);
+          // Continue with other CVs for non-AI errors
+          // Could add a fallback candidate with error message
         }
+      }
+
+      log.info("Successfully processed {} candidates", summaries.size());
+      return summaries;
+    } catch (Exception e) {
+      log.error("Error in candidate matching process", e);
+      throw e; // Let GlobalExceptionHandler handle it
     }
+  }
 }
