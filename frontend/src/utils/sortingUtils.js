@@ -76,16 +76,17 @@ export const sortCandidatesByFilename = (candidates, order = 'asc') => {
  * Sort candidates by rating percentage (normalized score)
  * @param {Array} candidates - Array of candidate objects
  * @param {string} order - Sort order: 'desc' (highest percentage first) or 'asc' (lowest percentage first)
+ * @param {Object} ratingConfig - Global rating configuration
  * @returns {Array} Sorted array of candidates
  */
-export const sortCandidatesByPercentage = (candidates, order = 'desc') => {
+export const sortCandidatesByPercentage = (candidates, order = 'desc', ratingConfig = { minRating: 1, maxRating: 10 }) => {
     if (!Array.isArray(candidates) || candidates.length === 0) {
         return candidates;
     }
 
     return [...candidates].sort((a, b) => {
-        const percentageA = calculateRatingPercentage(a);
-        const percentageB = calculateRatingPercentage(b);
+        const percentageA = calculateRatingPercentage(a, ratingConfig);
+        const percentageB = calculateRatingPercentage(b, ratingConfig);
         
         if (order === 'desc') {
             return percentageB - percentageA; // Highest percentage first
@@ -96,14 +97,15 @@ export const sortCandidatesByPercentage = (candidates, order = 'desc') => {
 };
 
 /**
- * Calculate rating percentage based on min/max rating
+ * Calculate rating percentage based on global min/max rating
  * @param {Object} candidate - Candidate object
+ * @param {Object} ratingConfig - Global rating configuration
  * @returns {number} Rating percentage (0-100)
  */
-const calculateRatingPercentage = (candidate) => {
+const calculateRatingPercentage = (candidate, ratingConfig = { minRating: 1, maxRating: 10 }) => {
     const rating = parseFloat(candidate.rating) || 0;
-    const minRating = parseFloat(candidate.minRating) || 0;
-    const maxRating = parseFloat(candidate.maxRating) || 100;
+    const minRating = ratingConfig.minRating || 1;
+    const maxRating = ratingConfig.maxRating || 10;
     
     if (maxRating === minRating) {
         return 0;
@@ -116,9 +118,10 @@ const calculateRatingPercentage = (candidate) => {
  * Sort candidates with multiple criteria
  * @param {Array} candidates - Array of candidate objects
  * @param {Array} sortCriteria - Array of sort criteria objects
+ * @param {Object} ratingConfig - Global rating configuration
  * @returns {Array} Sorted array of candidates
  */
-export const sortCandidatesMultiCriteria = (candidates, sortCriteria = []) => {
+export const sortCandidatesMultiCriteria = (candidates, sortCriteria = [], ratingConfig = { minRating: 1, maxRating: 10 }) => {
     if (!Array.isArray(candidates) || candidates.length === 0) {
         return candidates;
     }
@@ -143,7 +146,7 @@ export const sortCandidatesMultiCriteria = (candidates, sortCriteria = []) => {
                     comparison = (a.filename || '').localeCompare(b.filename || '');
                     break;
                 case 'percentage':
-                    comparison = calculateRatingPercentage(a) - calculateRatingPercentage(b);
+                    comparison = calculateRatingPercentage(a, ratingConfig) - calculateRatingPercentage(b, ratingConfig);
                     break;
                 default:
                     continue;

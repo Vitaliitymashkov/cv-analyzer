@@ -7,6 +7,7 @@ import React from 'react';
 import { Box, Heading, Text, Flex } from '@chakra-ui/react';
 import { getRatingColors } from '../../utils/colorUtils';
 import CircularRatingGauge from '../common/CircularRatingGauge';
+import useRatingConfig from '../../hooks/useRatingConfig';
 
 /**
  * CandidateCard component
@@ -16,12 +17,11 @@ import CircularRatingGauge from '../common/CircularRatingGauge';
  * @param {string} props.candidate.filename - CV filename
  * @param {string} props.candidate.summary - AI-generated summary
  * @param {number} props.candidate.rating - Rating score
- * @param {number} props.candidate.minRating - Minimum rating value
- * @param {number} props.candidate.maxRating - Maximum rating value
  * @returns {JSX.Element} CandidateCard component
  */
 const CandidateCard = ({ candidate }) => {
-    const colors = getRatingColors(candidate.rating, candidate.minRating, candidate.maxRating);
+    const { ratingConfig } = useRatingConfig();
+    const colors = getRatingColors(candidate.rating, ratingConfig.minRating, ratingConfig.maxRating);
 
     return (
         <Box 
@@ -46,8 +46,8 @@ const CandidateCard = ({ candidate }) => {
             <Box mb={4}>
                 <CircularRatingGauge 
                     rating={candidate.rating}
-                    minRating={candidate.minRating}
-                    maxRating={candidate.maxRating}
+                    minRating={ratingConfig.minRating}
+                    maxRating={ratingConfig.maxRating}
                     size="md"
                     showValue={true}
                     showTooltip={true}

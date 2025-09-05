@@ -12,6 +12,4 @@ public class CandidateSummary {
     private String filename;
     private String summary;
     private int rating;
-    private int minRating;
-    private int maxRating;
 }

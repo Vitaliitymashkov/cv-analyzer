@@ -1,6 +1,5 @@
 package com.symphony_solutions.cv_analyzer.controller;
 
-import com.symphony_solutions.cv_analyzer.config.RatingConfig;
 import com.symphony_solutions.cv_analyzer.model.Resume;
 import com.symphony_solutions.cv_analyzer.service.ResumeService;
 import com.symphony_solutions.cv_analyzer.service.AgentSummaryService;
@@ -29,12 +28,10 @@ public class AgentController {
 
     private final AgentSummaryService agentSummaryService;
 
-    private final RatingConfig ratingConfig;
-
     /**
      * Returns the most relevant candidates for a given vacancy description, with LLM-generated summary and rating.
      * @param request the vacancy description
-     * @return list of candidate summaries with rating range information
+     * @return list of candidate summaries with individual ratings
      */
     @PostMapping("/match")
     public List<CandidateSummary> matchCvs(@Valid @RequestBody MatchRequest request) {
@@ -55,9 +52,7 @@ public class AgentController {
                         resume.getName(),
                         resume.getFilename(),
                         summary,
-                        rating,
-                        ratingConfig.getMin(),
-                        ratingConfig.getMax()
+                        rating
                     );
                     summaries.add(candidate);
                 } catch (NonTransientAiException e) {
