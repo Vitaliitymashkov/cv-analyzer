@@ -3,8 +3,8 @@ package com.symphony_solutions.cv_analyzer.controller;
 import com.symphony_solutions.cv_analyzer.model.Resume;
 import com.symphony_solutions.cv_analyzer.service.ResumeService;
 import com.symphony_solutions.cv_analyzer.service.AgentSummaryService;
-import com.symphony_solutions.cv_analyzer.dto.MatchRequest;
-import com.symphony_solutions.cv_analyzer.dto.CandidateSummary;
+import com.symphony_solutions.cv_analyzer.dto.request.MatchRequestDto;
+import com.symphony_solutions.cv_analyzer.dto.response.CandidateSummaryResponseDto;
 import org.springframework.ai.retry.NonTransientAiException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.validation.annotation.Validated;
@@ -35,13 +35,13 @@ public class AgentController {
    * @return list of candidate summaries with individual ratings
    */
   @PostMapping("/match")
-  public List<CandidateSummary> matchCvs(@Valid @RequestBody MatchRequest request) {
+  public List<CandidateSummaryResponseDto> matchCvs(@Valid @RequestBody MatchRequestDto request) {
     log.info("Processing candidate match request for vacancy: {}",
         request.getVacancyDescription().substring(0, Math.min(100, request.getVacancyDescription().length())));
 
     try {
       List<Resume> topResumes = resumeService.findTopCandidates(request.getVacancyDescription(), 5);
-      List<CandidateSummary> summaries = new ArrayList<>();
+      List<CandidateSummaryResponseDto> summaries = new ArrayList<>();
 
       for (Resume resume : topResumes) {
         try {
@@ -49,7 +49,7 @@ public class AgentController {
           String summary = agentSummaryService.generateSummary(request.getVacancyDescription(), resume.getContent());
           int rating = agentSummaryService.generateRating(request.getVacancyDescription(), resume.getContent());
 
-          CandidateSummary candidate = CandidateSummary.builder()
+          CandidateSummaryResponseDto candidate = CandidateSummaryResponseDto.builder()
               .name(resume.getName())
               .filename(resume.getFilename())
               .summary(summary)

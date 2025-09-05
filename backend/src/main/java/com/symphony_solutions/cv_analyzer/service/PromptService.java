@@ -1,8 +1,8 @@
 package com.symphony_solutions.cv_analyzer.service;
 
 import com.symphony_solutions.cv_analyzer.config.RatingConfig;
-import com.symphony_solutions.cv_analyzer.dto.PromptDto;
-import com.symphony_solutions.cv_analyzer.dto.PromptUpdateRequest;
+import com.symphony_solutions.cv_analyzer.dto.response.PromptResponseDto;
+import com.symphony_solutions.cv_analyzer.dto.request.PromptUpdateRequestDto;
 import com.symphony_solutions.cv_analyzer.dto.type.PromptRole;
 import com.symphony_solutions.cv_analyzer.dto.type.PromptType;
 import com.symphony_solutions.cv_analyzer.exception.PromptManagementException;
@@ -101,19 +101,19 @@ public class PromptService {
   /**
    * Get all prompts as DTOs for management interface.
    */
-  public List<PromptDto> getAllPrompts() {
-    List<PromptDto> prompts = new ArrayList<>();
-    prompts.add(new PromptDto(PromptType.SUMMARY, PromptRole.SYSTEM, cachedSummarySystem, summarySystemPath, true));
-    prompts.add(new PromptDto(PromptType.SUMMARY, PromptRole.USER, cachedSummaryUser, summaryUserPath, true));
-    prompts.add(new PromptDto(PromptType.RATING, PromptRole.SYSTEM, cachedRatingSystem, ratingSystemPath, true));
-    prompts.add(new PromptDto(PromptType.RATING, PromptRole.USER, cachedRatingUser, ratingUserPath, true));
+  public List<PromptResponseDto> getAllPrompts() {
+    List<PromptResponseDto> prompts = new ArrayList<>();
+    prompts.add(new PromptResponseDto(PromptType.SUMMARY, PromptRole.SYSTEM, cachedSummarySystem, summarySystemPath, true));
+    prompts.add(new PromptResponseDto(PromptType.SUMMARY, PromptRole.USER, cachedSummaryUser, summaryUserPath, true));
+    prompts.add(new PromptResponseDto(PromptType.RATING, PromptRole.SYSTEM, cachedRatingSystem, ratingSystemPath, true));
+    prompts.add(new PromptResponseDto(PromptType.RATING, PromptRole.USER, cachedRatingUser, ratingUserPath, true));
     return prompts;
   }
 
   /**
    * Get a specific prompt by type and role.
    */
-  public PromptDto getPrompt(String typeStr, String roleStr) {
+  public PromptResponseDto getPrompt(String typeStr, String roleStr) {
     PromptType type;
     PromptRole role;
     try {
@@ -125,12 +125,12 @@ public class PromptService {
     return switch (type) {
       case SUMMARY -> switch (role) {
         case SYSTEM ->
-            new PromptDto(PromptType.SUMMARY, PromptRole.SYSTEM, cachedSummarySystem, summarySystemPath, true);
-        case USER -> new PromptDto(PromptType.SUMMARY, PromptRole.USER, cachedSummaryUser, summaryUserPath, true);
+            new PromptResponseDto(PromptType.SUMMARY, PromptRole.SYSTEM, cachedSummarySystem, summarySystemPath, true);
+        case USER -> new PromptResponseDto(PromptType.SUMMARY, PromptRole.USER, cachedSummaryUser, summaryUserPath, true);
       };
       case RATING -> switch (role) {
-        case SYSTEM -> new PromptDto(PromptType.RATING, PromptRole.SYSTEM, cachedRatingSystem, ratingSystemPath, true);
-        case USER -> new PromptDto(PromptType.RATING, PromptRole.USER, cachedRatingUser, ratingUserPath, true);
+        case SYSTEM -> new PromptResponseDto(PromptType.RATING, PromptRole.SYSTEM, cachedRatingSystem, ratingSystemPath, true);
+        case USER -> new PromptResponseDto(PromptType.RATING, PromptRole.USER, cachedRatingUser, ratingUserPath, true);
       };
     };
   }
@@ -138,7 +138,7 @@ public class PromptService {
   /**
    * Update a prompt and save it to file.
    */
-  public synchronized PromptDto updatePrompt(PromptUpdateRequest request) {
+  public synchronized PromptResponseDto updatePrompt(PromptUpdateRequestDto request) {
     validatePromptUpdateRequest(request);
     PromptType type = request.getType();
     PromptRole role = request.getRole();
@@ -148,7 +148,7 @@ public class PromptService {
       writeToFile(filePath, content);
       updateCache(type, role, content);
       log.info("Successfully updated prompt: {}/{}", type, role);
-      return new PromptDto(type, role, content, filePath, true);
+      return new PromptResponseDto(type, role, content, filePath, true);
     } catch (Exception e) {
       log.error("Failed to update prompt: {}/{}", type, role, e);
       throw new PromptManagementException("Failed to update prompt: " + e.getMessage(), e);
@@ -158,7 +158,7 @@ public class PromptService {
   /**
    * Reset a prompt to its default value from the classpath resource.
    */
-  public synchronized PromptDto resetPrompt(String typeStr, String roleStr) {
+  public synchronized PromptResponseDto resetPrompt(String typeStr, String roleStr) {
     PromptType type;
     PromptRole role;
     try {
@@ -173,14 +173,14 @@ public class PromptService {
       writeToFile(filePath, originalContent);
       updateCache(type, role, originalContent);
       log.info("Successfully reset prompt: {}/{}", type, role);
-      return new PromptDto(type, role, originalContent, filePath, true);
+      return new PromptResponseDto(type, role, originalContent, filePath, true);
     } catch (Exception e) {
       log.error("Failed to reset prompt: {}/{}", type, role, e);
       throw new PromptManagementException("Failed to reset prompt: " + e.getMessage(), e);
     }
   }
 
-  private void validatePromptUpdateRequest(PromptUpdateRequest request) {
+  private void validatePromptUpdateRequest(PromptUpdateRequestDto request) {
     if (request == null) {
       throw new PromptManagementException("Prompt update request cannot be null");
     }

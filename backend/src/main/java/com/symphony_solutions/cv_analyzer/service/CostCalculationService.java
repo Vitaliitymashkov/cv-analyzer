@@ -1,5 +1,6 @@
 package com.symphony_solutions.cv_analyzer.service;
 
+import com.symphony_solutions.cv_analyzer.dto.response.PricingInfoResponseDto;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import jakarta.annotation.PostConstruct;
@@ -129,8 +130,8 @@ public class CostCalculationService {
     /**
      * Get pricing information.
      */
-    public PricingInfo getPricingInfo() {
-        return new PricingInfo(
+    public PricingInfoResponseDto getPricingInfo() {
+        return new PricingInfoResponseDto(
             inputTokensPerMillion,
             outputTokensPerMillion,
             currency
@@ -144,14 +145,6 @@ public class CostCalculationService {
         return latestAiCall;
     }
 
-  /**
-   * Data class for pricing information.
-   */
-  public record PricingInfo(BigDecimal inputTokensPerMillion,
-                            BigDecimal outputTokensPerMillion,
-                            String currency) {
-  }
-  
   /**
    * Data class for latest AI call information.
    */

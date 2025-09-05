@@ -1,4 +1,4 @@
-package com.symphony_solutions.cv_analyzer.dto;
+package com.symphony_solutions.cv_analyzer.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RatingConfigDto {
+public class RatingConfigResponseDto {
     private int minRating;
     private int maxRating;
     private String rangeDescription;

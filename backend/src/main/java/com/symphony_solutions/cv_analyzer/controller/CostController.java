@@ -1,5 +1,6 @@
 package com.symphony_solutions.cv_analyzer.controller;
 
+import com.symphony_solutions.cv_analyzer.dto.response.PricingInfoResponseDto;
 import com.symphony_solutions.cv_analyzer.service.CostCalculationService;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +36,7 @@ public class CostController {
      * Get pricing information only.
      */
     @GetMapping("/pricing")
-    public CostCalculationService.PricingInfo getPricing() {
+    public PricingInfoResponseDto getPricing() {
         return costCalculationService.getPricingInfo();
     }
 }

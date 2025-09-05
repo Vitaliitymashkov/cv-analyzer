@@ -1,4 +1,4 @@
-package com.symphony_solutions.cv_analyzer.dto;
+package com.symphony_solutions.cv_analyzer.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class MatchRequest {
+public class MatchRequestDto {
 
     @NotBlank(message = "Vacancy description cannot be blank")
     @Size(min = 10, max = 10000, message = "Vacancy description must be between 10 and 10000 characters")

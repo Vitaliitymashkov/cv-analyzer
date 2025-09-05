@@ -1,7 +1,7 @@
 package com.symphony_solutions.cv_analyzer.controller;
 
-import com.symphony_solutions.cv_analyzer.dto.PromptDto;
-import com.symphony_solutions.cv_analyzer.dto.PromptUpdateRequest;
+import com.symphony_solutions.cv_analyzer.dto.response.PromptResponseDto;
+import com.symphony_solutions.cv_analyzer.dto.request.PromptUpdateRequestDto;
 import com.symphony_solutions.cv_analyzer.exception.PromptManagementException;
 import com.symphony_solutions.cv_analyzer.service.PromptService;
 import lombok.RequiredArgsConstructor;
@@ -33,9 +33,9 @@ public class PromptManagementController {
      */
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<PromptDto>> getAllPrompts() {
+    public ResponseEntity<List<PromptResponseDto>> getAllPrompts() {
         try {
-            List<PromptDto> prompts = promptService.getAllPrompts();
+            List<PromptResponseDto> prompts = promptService.getAllPrompts();
             return ResponseEntity.ok(prompts);
         } catch (Exception e) {
             log.error("Failed to retrieve prompts", e);
@@ -52,11 +52,11 @@ public class PromptManagementController {
      */
     @GetMapping("/{type}/{role}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PromptDto> getPrompt(
+    public ResponseEntity<PromptResponseDto> getPrompt(
             @PathVariable String type,
             @PathVariable String role) {
         try {
-            PromptDto prompt = promptService.getPrompt(type, role);
+            PromptResponseDto prompt = promptService.getPrompt(type, role);
             return ResponseEntity.ok(prompt);
         } catch (PromptManagementException e) {
             log.warn("Invalid prompt request: {}/{}", type, role, e);
@@ -75,9 +75,9 @@ public class PromptManagementController {
      */
     @PutMapping
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PromptDto> updatePrompt(@RequestBody PromptUpdateRequest request) {
+    public ResponseEntity<PromptResponseDto> updatePrompt(@RequestBody PromptUpdateRequestDto request) {
         try {
-            PromptDto updatedPrompt = promptService.updatePrompt(request);
+            PromptResponseDto updatedPrompt = promptService.updatePrompt(request);
             log.info("Prompt updated successfully: {}/{}", request.getType(), request.getRole());
             return ResponseEntity.ok(updatedPrompt);
         } catch (PromptManagementException e) {
@@ -98,11 +98,11 @@ public class PromptManagementController {
      */
     @PostMapping("/{type}/{role}/reset")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<PromptDto> resetPrompt(
+    public ResponseEntity<PromptResponseDto> resetPrompt(
             @PathVariable String type,
             @PathVariable String role) {
         try {
-            PromptDto resetPrompt = promptService.resetPrompt(type, role);
+            PromptResponseDto resetPrompt = promptService.resetPrompt(type, role);
             log.info("Prompt reset successfully: {}/{}", type, role);
             return ResponseEntity.ok(resetPrompt);
         } catch (PromptManagementException e) {
