@@ -400,6 +400,8 @@ swagger-ui/
 *.txt
 !backend/src/main/resources/cvs/*.pdf
 !backend/src/main/resources/cvs/*.txt
+!backend/src/main/resources/examples/*.txt
+!backend/src/main/resources/examples/*.pdf
 
 # Personal data
 personal-data/
