@@ -46,8 +46,11 @@ public class AgentController {
       for (Resume resume : topResumes) {
         try {
           log.debug("Processing CV: {}", resume.getFilename());
-          String summary = agentSummaryService.generateSummary(request.getVacancyDescription(), resume.getContent());
-          int rating = agentSummaryService.generateRating(request.getVacancyDescription(), resume.getContent());
+          String summary = agentSummaryService.generateSummary(request.getVacancyDescription(), resume.getContent())
+              .getContent();
+          var ratingResponse = agentSummaryService
+              .generateRating(request.getVacancyDescription(), resume.getContent());
+          int rating = agentSummaryService.extractRatingFromContent(ratingResponse.getContent());
 
           CandidateSummaryResponseDto candidate = CandidateSummaryResponseDto.builder()
               .name(resume.getName())

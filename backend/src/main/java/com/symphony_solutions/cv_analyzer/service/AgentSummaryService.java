@@ -19,34 +19,25 @@ public class AgentSummaryService {
     private final PromptService promptService;
     private final RatingConfig ratingConfig;
 
-        public String generateSummary(String vacancyDescription, String cvContent) {
-        return generateSummaryInternal(vacancyDescription, cvContent).getContent();
+    public InternalChatResponse generateSummary(String vacancyDescription, String cvContent) {
+      return generateInternalResponse(
+          promptService.getSummarySystemPrompt(),
+          promptService.getSummaryUserPrompt(),
+          vacancyDescription,
+          cvContent
+      );
     }
 
-    public InternalChatResponse generateSummaryInternal(String vacancyDescription, String cvContent) {
-        return generateInternalResponse(
-            promptService.getSummarySystemPrompt(),
-            promptService.getSummaryUserPrompt(),
-            vacancyDescription,
-            cvContent
-        );
+  public InternalChatResponse generateRating(String vacancyDescription, String cvContent) {
+      return generateInternalResponse(
+          promptService.getRatingSystemPrompt(),
+          promptService.getRatingUserPrompt(),
+          vacancyDescription,
+          cvContent
+      );
     }
 
-    public int generateRating(String vacancyDescription, String cvContent) {
-        InternalChatResponse response = generateRatingInternal(vacancyDescription, cvContent);
-        return extractRatingFromContent(response.getContent());
-    }
-
-    public InternalChatResponse generateRatingInternal(String vacancyDescription, String cvContent) {
-        return generateInternalResponse(
-            promptService.getRatingSystemPrompt(),
-            promptService.getRatingUserPrompt(),
-            vacancyDescription,
-            cvContent
-        );
-    }
-    
-    private InternalChatResponse generateInternalResponse(String systemPrompt, String userTemplate, 
+  private InternalChatResponse generateInternalResponse(String systemPrompt, String userTemplate,
                                                         String vacancyDescription, String cvContent) {
         String userMessage = userTemplate
                 .replace("{{vacancy_description}}", vacancyDescription)
@@ -55,9 +46,9 @@ public class AgentSummaryService {
         return getInternalChatResponse(systemPrompt, userMessage);
     }
     
-    private int extractRatingFromContent(String content) {
+    public int extractRatingFromContent(String content) {
         return Optional.ofNullable(content)
-                .map(r -> r.replaceAll("[^0-9]", "").trim())
+                .map(r -> r.replaceAll("\\D", "").trim())
                 .flatMap(this::parseIntSafe)
                 .map(rating -> Math.max(ratingConfig.getMin(), Math.min(rating, ratingConfig.getMax())))
                 .orElse(ratingConfig.getMin());
