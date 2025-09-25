@@ -4,10 +4,16 @@
 
 set -e
 
+PROFILE=${SPRING_PROFILES_ACTIVE:-}
+
 case "$1" in
     "start")
         echo "Starting CV Analyzer services..."
-        docker-compose up -d
+        if [ -n "$2" ]; then
+            PROFILE="$2"
+        fi
+        echo "Using Spring profile: ${PROFILE:-<default>}"
+        SPRING_PROFILES_ACTIVE="$PROFILE" docker-compose up -d
         echo "Services started!"
         echo "Frontend: http://localhost:3000"
         echo "Backend: http://localhost:8080"
@@ -19,13 +25,21 @@ case "$1" in
         ;;
     "restart")
         echo "Restarting CV Analyzer services..."
+        if [ -n "$2" ]; then
+            PROFILE="$2"
+        fi
         docker-compose down
-        docker-compose up -d
+        echo "Using Spring profile: ${PROFILE:-<default>}"
+        SPRING_PROFILES_ACTIVE="$PROFILE" docker-compose up -d
         echo "Services restarted!"
         ;;
     "build")
         echo "Building CV Analyzer images..."
-        docker-compose build
+        if [ -n "$2" ]; then
+            PROFILE="$2"
+        fi
+        echo "Using Spring profile: ${PROFILE:-<default>}"
+        SPRING_PROFILES_ACTIVE="$PROFILE" docker-compose build
         echo "Images built successfully!"
         ;;
     "logs")
@@ -37,7 +51,11 @@ case "$1" in
         ;;
     "dev")
         echo "Starting CV Analyzer in development mode..."
-        docker-compose -f docker-compose.dev.yml up --build
+        if [ -n "$2" ]; then
+            PROFILE="$2"
+        fi
+        echo "Using Spring profile: ${PROFILE:-dev}"
+        SPRING_PROFILES_ACTIVE="${PROFILE:-dev}" docker-compose -f docker-compose.dev.yml up --build
         ;;
     "dev-stop")
         echo "Stopping CV Analyzer development services..."
@@ -63,23 +81,26 @@ case "$1" in
     *)
         echo "CV Analyzer Docker Management Script"
         echo ""
-        echo "Usage: $0 {start|stop|restart|build|logs|dev|dev-stop|clean|status|test}"
+        echo "Usage: $0 {start|stop|restart|build|logs|dev|dev-stop|clean|status|test} [profile]"
         echo ""
         echo "Commands:"
-        echo "  start     - Start all services in production mode"
+        echo "  start     - Start all services in production mode (profile optional: main|groq)"
         echo "  stop      - Stop all services"
-        echo "  restart   - Restart all services"
-        echo "  build     - Build all Docker images"
+        echo "  restart   - Restart all services (profile optional: main|groq)"
+        echo "  build     - Build all Docker images (profile optional: main|groq)"
         echo "  logs      - Show logs (all services or specific service)"
-        echo "  dev       - Start services in development mode with hot reloading"
+        echo "  dev       - Start services in development mode with hot reloading (profile optional: dev|groq)"
         echo "  dev-stop  - Stop development services"
         echo "  clean     - Clean up all Docker resources"
         echo "  status    - Show service status"
         echo "  test      - Test if services are responding"
         echo ""
         echo "Examples:"
-        echo "  $0 start"
+        echo "  $0 start main"
+        echo "  $0 start groq"
+        :
         echo "  $0 logs backend"
-        echo "  $0 dev"
+        echo "  $0 dev groq"
+        :
         ;;
 esac

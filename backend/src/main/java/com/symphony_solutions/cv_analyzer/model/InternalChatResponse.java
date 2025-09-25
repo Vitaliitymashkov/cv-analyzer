@@ -1,6 +1,7 @@
 package com.symphony_solutions.cv_analyzer.model;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,6 +11,7 @@ import lombok.NoArgsConstructor;
  * token usage information to AOP aspects.
  */
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class InternalChatResponse {

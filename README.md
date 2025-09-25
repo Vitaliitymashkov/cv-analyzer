@@ -123,6 +123,53 @@ The application will be available at:
 ./docker-scripts.sh dev
 ```
 
+#### Selecting an AI profile (OpenAI vs Groq)
+
+The backend supports multiple Spring profiles to switch AI providers:
+
+- `main` (default) – OpenAI-compatible settings from `application.properties`
+- `groq` – Uses `application-groq.properties` (Groq's OpenAI-compatible endpoint)
+- `dev` – Development profile used by `docker-compose.dev.yml`
+
+Use any of the following methods to select a profile:
+
+1) With the management script:
+
+```bash
+# OpenAI (default)
+./docker-scripts.sh start
+
+# Explicit OpenAI
+./docker-scripts.sh start main
+
+# Groq profile
+./docker-scripts.sh start groq
+
+# Development with Groq
+./docker-scripts.sh dev groq
+```
+
+2) With Docker Compose directly:
+
+```bash
+# Production stack with Groq
+SPRING_PROFILES_ACTIVE=groq docker-compose up -d
+
+# Development stack with Groq (overrides default dev)
+SPRING_PROFILES_ACTIVE=groq docker-compose -f docker-compose.dev.yml up --build
+```
+
+3) Running locally (without Docker):
+
+```bash
+cd backend
+./mvnw spring-boot:run -Dspring-boot.run.profiles=groq
+```
+
+Notes:
+- Set `OPENAI_API_KEY` to your Groq API key when using the `groq` profile.
+- Groq profile uses base URL `https://api.groq.com/openai` and model `gemma2-9b-it` by default.
+
 ### Option 2: Local Development
 
 If you prefer to run the services locally:

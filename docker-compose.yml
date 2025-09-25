@@ -10,6 +10,7 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
       - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
     volumes:
       - ./backend/src/main/resources/cvs:/app/cvs:ro
       - ./backend/src/main/resources/prompts:/app/prompts:ro

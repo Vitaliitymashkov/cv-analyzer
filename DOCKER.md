@@ -31,6 +31,17 @@ docker-compose up --build
 docker-compose up -d --build
 ```
 
+##### Selecting an AI Profile (OpenAI vs Groq)
+You can switch between AI providers by setting `SPRING_PROFILES_ACTIVE`:
+
+```bash
+# OpenAI (default configuration)
+docker-compose up -d
+
+# Groq profile (uses application-groq.properties)
+SPRING_PROFILES_ACTIVE=groq docker-compose up -d
+```
+
 #### Development Mode
 ```bash
 # Build and start development services
@@ -38,6 +49,9 @@ docker-compose -f docker-compose.dev.yml up --build
 
 # Run in background
 docker-compose -f docker-compose.dev.yml up -d --build
+
+# Override the default dev profile with Groq
+SPRING_PROFILES_ACTIVE=groq docker-compose -f docker-compose.dev.yml up --build
 ```
 
 ### 3. Access the Application
@@ -78,6 +92,9 @@ The development setup includes:
 ```bash
 # Start development environment
 docker-compose -f docker-compose.dev.yml up
+
+# Start development with Groq profile
+SPRING_PROFILES_ACTIVE=groq docker-compose -f docker-compose.dev.yml up --build
 
 # View logs
 docker-compose -f docker-compose.dev.yml logs -f
