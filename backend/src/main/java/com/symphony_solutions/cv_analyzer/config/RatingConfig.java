@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 public class RatingConfig {
     
     private int min = 1;
-    private int max = 10;
+    private int max = 100;
     
     public String getRangeDescription() {
         return min + " to " + max;
